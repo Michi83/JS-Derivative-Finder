@@ -49,3 +49,12 @@ var testParser = function()
 }
 
 testParser()
+
+var testUnparse = function()
+{
+    var token = parse("(1 + 2) * 3")
+    var expression = unparse(token)
+    assert(expression === "(1 + 2) * 3", "unparse test failed")
+}
+
+testUnparse()
