@@ -1,7 +1,7 @@
 var Tokenizer = function(expression)
 {
     this.expression = expression + "\0"
-    this.to = to
+    this.to = 0
 }
 
 Tokenizer.prototype =
@@ -26,20 +26,20 @@ Tokenizer.prototype =
             return new Token("identifier", this.expression.substring(this.from, this.to))
         }
         // numbers
-        else if (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) >= "9")
+        else if (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) <= "9")
         {
             this.to++
-            while (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) >= "9")
+            while (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) <= "9")
             {
                 this.to++
             }
             if (this.expression.charAt(this.to) === ".")
             {
                 this.to++
-                if (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) >= "9")
+                if (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) <= "9")
                 {
                     this.to++
-                    while (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) >= "9")
+                    while (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) <= "9")
                     {
                         this.to++
                     }
@@ -56,10 +56,10 @@ Tokenizer.prototype =
                 {
                     this.to++
                 }
-                if (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) >= "9")
+                if (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) <= "9")
                 {
                     this.to++
-                    while (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) >= "9")
+                    while (this.expression.charAt(this.to) >= "0" && this.expression.charAt(this.to) <= "9")
                     {
                         this.to++
                     }
@@ -78,10 +78,10 @@ Tokenizer.prototype =
             return new Token(this.expression.charAt(this.from))
         }
         // whitespace
-        else if (this.expression.charAt(this.to) >= "\t" && this.expression.charAt(this.to) <= "\r")
+        else if (this.expression.charAt(this.to) >= "\t" && this.expression.charAt(this.to) <= "\r" || this.expression.charAt(this.to) === " ")
         {
             this.to++
-            while (this.expression.charAt(this.to) >= "\t" && this.expression.charAt(this.to) <= "\r")
+            while (this.expression.charAt(this.to) >= "\t" && this.expression.charAt(this.to) <= "\r" || this.expression.charAt(this.to) === " ")
             {
                 this.to++
             }
