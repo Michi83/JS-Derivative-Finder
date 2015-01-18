@@ -58,3 +58,21 @@ var testUnparse = function()
 }
 
 testUnparse()
+
+var testSimplifyProducts = function()
+{
+    var token = parse("1 * a")
+    simplify(token)
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyProducts failed")
+    token = parse("0 * a")
+    simplify(token)
+    assert(token.type === "number" && token.value === 0, "testSimplifyProducts failed")
+    token = parse("a * 1")
+    simplify(token)
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyProducts failed")
+    token = parse("a * 0")
+    simplify(token)
+    assert(token.type === "number" && token.value === 0, "testSimplifyProducts failed")
+}
+
+testSimplifyProducts()
