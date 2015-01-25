@@ -59,20 +59,65 @@ var testUnparse = function()
 
 testUnparse()
 
-var testSimplifyProducts = function()
+var testSimplifyMultiplication = function()
 {
     var token = parse("1 * a")
     simplify(token)
-    assert(token.type === "identifier" && token.value === "a", "testSimplifyProducts failed")
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyMultiplication failed")
     token = parse("0 * a")
     simplify(token)
-    assert(token.type === "number" && token.value === 0, "testSimplifyProducts failed")
+    assert(token.type === "number" && token.value === 0, "testSimplifyMultiplication failed")
     token = parse("a * 1")
     simplify(token)
-    assert(token.type === "identifier" && token.value === "a", "testSimplifyProducts failed")
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyMultiplication failed")
     token = parse("a * 0")
     simplify(token)
-    assert(token.type === "number" && token.value === 0, "testSimplifyProducts failed")
+    assert(token.type === "number" && token.value === 0, "testSimplifyMultiplication failed")
 }
 
-testSimplifyProducts()
+testSimplifyMultiplication()
+
+var testSimplifyAddition = function()
+{
+    var token = parse("0 + a")
+    simplify(token)
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyAddition failed")
+    token = parse("a + 0")
+    simplify(token)
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyAddition failed")
+}
+
+testSimplifyAddition()
+
+var testSimplifySubtraction = function()
+{
+    var token = parse("0 - a")
+    simplify(token)
+    assert(token.type === "~" && token.right.value === "a", "testSimplifySubtraction failed")
+    token = parse("a - 0")
+    simplify(token)
+    assert(token.type === "identifier" && token.value === "a", "testSimplifySubtraction failed")
+}
+
+testSimplifySubtraction()
+
+var testSimplifyDivision = function()
+{
+    var token = parse("0 / a")
+    simplify(token)
+    assert(token.type === "number" && token.value === 0, "testSimplifyDivision failed")
+    token = parse("a / 1")
+    simplify(token)
+    assert(token.type === "identifier" && token.value === "a", "testSimplifyDivision failed")
+}
+
+testSimplifyDivision()
+
+var testSimplifyNegation = function()
+{
+    var token = parse("-0")
+    simplify(token)
+    assert(token.type === "number" && token.value === 0, "testSimplifyNegation failed")
+}
+
+testSimplifyNegation()
