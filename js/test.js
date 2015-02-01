@@ -121,3 +121,12 @@ var testSimplifyNegation = function()
 }
 
 testSimplifyNegation()
+
+var testDeriveX = function()
+{
+    var token = parse("x")
+    token = derive(token)
+    assert(token.type === "number" && token.value === 1, "testDeriveX failed")
+}
+
+testDeriveX()

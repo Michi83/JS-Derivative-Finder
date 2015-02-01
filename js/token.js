@@ -10,6 +10,21 @@ Token.prototype =
         this.setAttributes(that.type, that.value, that.left, that.right)
     },
     
+    deepCopy: function()
+    {
+        var left
+        var right
+        if (this.left !== undefined)
+        {
+            left = this.left.deepCopy()
+        }
+        if (this.right !== undefined)
+        {
+            right = this.right.deepCopy()
+        }
+        return new Token(this.type, this.value, left, right)
+    },
+    
     setAttributes: function(type, value, left, right)
     {
         this.type = type

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script src="js/token.js"></script>
+        <script src="js/tokenizer.js"></script>
+        <script src="js/parse.js"></script>
+        <script src="js/unparse.js"></script>
+        <script src="js/simplify.js"></script>
+        <script src="js/derive.js"></script>
+        <script src="js/test.js"></script>
+        <script>
+            var processInput = function()
+            {
+                var expression = document.getElementById("expression").value
+                var token = parse(expression)
+                var derivative = derive(token)
+                document.getElementById("derivative").innerHTML = unparse(derivative)
+            }
+        </script>
+        <title>Derive</title>
+    </head>
+    <body>
+        <div>
+            f(x) =
+            <input id="expression" type="text" />
+            <input onclick="processInput()" type="button" value="derive" />
+        </div>
+        <div>
+            df/dx =
+            <span id="derivative"></span>
+        </div>
+    </body>
+</html>
