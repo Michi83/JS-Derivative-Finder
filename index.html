@@ -13,9 +13,18 @@
             var processInput = function()
             {
                 var expression = document.getElementById("expression").value
-                var token = parse(expression)
-                var derivative = derive(token)
-                document.getElementById("derivative").innerHTML = unparse(derivative)
+                try
+                {
+                    var token = parse(expression)
+                    var derivative = derive(token)
+                    simplify(derivative)
+                    document.getElementById("derivative").innerHTML = unparse(derivative)
+                }
+                catch (exception)
+                {
+                    console.log(exception)
+                    document.getElementById("derivative").innerHTML = "sorry, I couldn't derive that"
+                }
             }
         </script>
         <title>Derive</title>
