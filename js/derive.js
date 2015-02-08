@@ -22,6 +22,29 @@ var derive = function(token)
         var right = derive(token.right)
         return new Token("+", undefined, left, right)
     }
+    else if (token.type === "^")
+    {
+        if (token.right.type === "number")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "*",
+                    undefined,
+                    new Token("number", token.right.value),
+                    new Token("^", undefined, token.left.deepCopy(), new Token("number", token.right.value - 1))
+                ),
+                derive(token.left)
+            )
+        }
+        else
+        {
+            throw "derivative not implemented"
+        }
+    }
     else if (token.type === "identifier")
     {
         if (token.value === "x")

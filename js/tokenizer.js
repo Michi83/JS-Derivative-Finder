@@ -72,7 +72,7 @@ Tokenizer.prototype =
             return new Token("number", parseFloat(this.expression.substring(this.from, this.to)))
         }
         // one char tokens
-        else if (this.expression.charAt(this.to) >= "(" && this.expression.charAt(this.to) <= "+" || this.expression.charAt(this.to) === "-" || this.expression.charAt(this.to) === "/")
+        else if (this.expression.charAt(this.to) >= "(" && this.expression.charAt(this.to) <= "+" || this.expression.charAt(this.to) === "-" || this.expression.charAt(this.to) === "/" || this.expression.charAt(this.to) === "^")
         {
             this.to++
             return new Token(this.expression.charAt(this.from))

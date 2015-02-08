@@ -4,8 +4,9 @@ var precedence =
     "+": 0,
     "-": 0,
     "/": 1,
-    "identifier": 3,
-    "number": 3,
+    "^": 3,
+    "identifier": 4,
+    "number": 4,
     "~": 2
 }
 
@@ -55,6 +56,21 @@ var unparse = function(token)
         }
         return left + " / " + right
     }
+    // ^
+    else if (token.type === "^")
+    {
+        var left = unparse(token.left)
+        var right = unparse(token.right)
+        if (precedence[token.left.type] < 4)
+        {
+            left = "(" + left + ")"
+        }
+        if (precedence[token.right.type] < 3)
+        {
+            right = "(" + right + ")"
+        }
+        return left + " ^ " + right
+    }
     // identifiers
     else if (token.type === "identifier")
     {
@@ -63,7 +79,7 @@ var unparse = function(token)
     // numbers
     else if (token.type === "number")
     {
-        return token.value
+        return token.value + ""
     }
     // ~
     else if (token.type === "~")

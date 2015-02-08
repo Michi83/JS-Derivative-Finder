@@ -35,7 +35,7 @@ var simplify = function(token)
             }
         }
     }
-    if (token.type === "+")
+    else if (token.type === "+")
     {
         if (token.left.type === "number")
         {
@@ -54,7 +54,7 @@ var simplify = function(token)
             }
         }
     }
-    if (token.type === "-")
+    else if (token.type === "-")
     {
         if (token.left.type === "number")
         {
@@ -73,7 +73,7 @@ var simplify = function(token)
             }
         }
     }
-    if (token.type === "/")
+    else if (token.type === "/")
     {
         if (token.left.type === "number")
         {
@@ -92,7 +92,36 @@ var simplify = function(token)
             }
         }
     }
-    if (token.type === "~")
+    else if (token.type === "^")
+    {
+        if (token.left.type === "number")
+        {
+            if (token.left.value === 0)
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (token.left.value === 1)
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+        }
+        if (token.right.type === "number")
+        {
+            if (token.right.value === 0)
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+            else if (token.right.value === 1)
+            {
+                token.copyAttributesFrom(token.left)
+                return
+            }
+        }
+    }
+    else if (token.type === "~")
     {
         if (token.right.type === "number")
         {
