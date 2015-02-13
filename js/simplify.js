@@ -1,3 +1,8 @@
+/*
+ * Applies some algebraic simplification rules to a syntax tree. Note that this
+ * function changes the tree, so if you need the original tree, make a deep copy
+ * of it.
+ */
 var simplify = function(token)
 {
     if (token === undefined)
@@ -8,6 +13,11 @@ var simplify = function(token)
     simplify(token.right)
     if (token.type === "*")
     {
+        if (token.left.type === "number" && token.right.type === "number")
+        {
+            token.setAttributes("number", token.left.value * token.right.value)
+            return
+        }
         if (token.left.type === "number")
         {
             if (token.left.value === 0)
@@ -37,6 +47,11 @@ var simplify = function(token)
     }
     else if (token.type === "+")
     {
+        if (token.left.type === "number" && token.right.type === "number")
+        {
+            token.setAttributes("number", token.left.value + token.right.value)
+            return
+        }
         if (token.left.type === "number")
         {
             if (token.left.value === 0)
@@ -56,6 +71,11 @@ var simplify = function(token)
     }
     else if (token.type === "-")
     {
+        if (token.left.type === "number" && token.right.type === "number")
+        {
+            token.setAttributes("number", token.left.value - token.right.value)
+            return
+        }
         if (token.left.type === "number")
         {
             if (token.left.value === 0)
@@ -75,6 +95,11 @@ var simplify = function(token)
     }
     else if (token.type === "/")
     {
+        if (token.left.type === "number" && token.right.type === "number")
+        {
+            token.setAttributes("number", token.left.value / token.right.value)
+            return
+        }
         if (token.left.type === "number")
         {
             if (token.left.value === 0)
@@ -94,6 +119,11 @@ var simplify = function(token)
     }
     else if (token.type === "^")
     {
+        if (token.left.type === "number" && token.right.type === "number")
+        {
+            token.setAttributes("number", Math.pow(token.left.value, token.right.value))
+            return
+        }
         if (token.left.type === "number")
         {
             if (token.left.value === 0)
@@ -125,11 +155,8 @@ var simplify = function(token)
     {
         if (token.right.type === "number")
         {
-            if (token.right.value === 0)
-            {
-                token.copyAttributesFrom(token.right)
-                return
-            }
+            token.setAttributes("number", -token.right.value)
+            return
         }
     }
 }

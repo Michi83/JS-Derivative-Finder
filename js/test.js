@@ -67,18 +67,18 @@ var tests =
         var token = parse("(1 + 2) * 3")
         var expression = unparse(token)
         assert(expression === "(1 + 2) * 3", "unparse test failed: (1 + 2) * 3")
-        token = parse("a ^ b ^ c")
+        token = parse("a^b^c")
         expression = unparse(token)
-        assert(expression === "a ^ b ^ c", "unparse test failed: a ^ b ^ c")
-        token = parse("(a ^ b) ^ c")
+        assert(expression === "a^b^c", "unparse test failed: a^b^c")
+        token = parse("(a^b)^c")
         expression = unparse(token)
-        assert(expression === "(a ^ b) ^ c", "unparse test failed: (a ^ b) ^ c")
-        token = parse("-a ^ b")
+        assert(expression === "(a^b)^c", "unparse test failed: (a^b)^c")
+        token = parse("-a^b")
         expression = unparse(token)
-        assert(expression === "-a ^ b", "unparse test failed: -a ^ b")
-        token = parse("(-a) ^ b")
+        assert(expression === "-a^b", "unparse test failed: -a^b")
+        token = parse("(-a)^b")
         expression = unparse(token)
-        assert(expression === "(-a) ^ b", "unparse test failed: (-a) ^ b")
+        assert(expression === "(-a)^b", "unparse test failed: (-a)^b")
     },
     
     testSimplifyMultiplication: function()
@@ -160,10 +160,10 @@ var tests =
     
     testDeriveXToTheNthPower: function()
     {
-        var token = parse("x ^ 3")
+        var token = parse("x^3")
         token = derive(token)
         simplify(token)
-        assert(unparse(token) === "3 * x ^ 2", "derivation of x ^ 3 failed")
+        assert(unparse(token) === "3 * x^2", "derivation of x^3 failed")
     },
 }
 
