@@ -76,4 +76,8 @@ var derive = function(token)
     {
         return new Token("number", 0)
     }
+    else if (token.type === "~")
+    {
+        return new Token("~", undefined, undefined, derive(token.right))
+    }
 }
