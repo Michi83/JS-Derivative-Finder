@@ -69,7 +69,7 @@ var unparse = function(token)
         {
             right = "(" + right + ")"
         }
-        return left + " ^ " + right
+        return left + "^" + right
     }
     // identifiers
     else if (token.type === "identifier")

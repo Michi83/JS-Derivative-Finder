@@ -12,15 +12,27 @@ var derive = function(token)
     }
     else if (token.type === "+")
     {
-        var left = derive(token.left)
-        var right = derive(token.right)
-        return new Token("+", undefined, left, right)
+        return new Token("+", undefined, derive(token.left), derive(token.right))
     }
     else if (token.type === "-")
     {
-        var left = derive(token.left)
-        var right = derive(token.right)
-        return new Token("+", undefined, left, right)
+        return new Token("-", undefined, derive(token.left), derive(token.right))
+    }
+    else if (token.type === "/")
+    {
+        return new Token
+        (
+            "/",
+            undefined,
+            new Token
+            (
+                "-",
+                undefined,
+                new Token("*", undefined, derive(token.left), token.right.deepCopy()),
+                new Token("*", undefined, token.left.deepCopy(), derive(token.right))
+            ),
+            new Token("^", undefined, token.right.deepCopy(), new Token("number", 2))
+        )
     }
     else if (token.type === "^")
     {
@@ -39,6 +51,10 @@ var derive = function(token)
                 ),
                 derive(token.left)
             )
+        }
+        else if (token.left.type === "identifier" && token.left.value === "e")
+        {
+            return new Token("*", undefined, token.deepCopy(), derive(token.right))
         }
         else
         {
