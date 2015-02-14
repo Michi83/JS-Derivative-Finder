@@ -12,8 +12,15 @@ var precedence =
 
 var unparse = function(token)
 {
+    // ()
+    if (token.type === "(")
+    {
+        var left = unparse(token.left)
+        var right = unparse(token.right)
+        return left + "(" + right + ")"
+    }
     // *
-    if (token.type === "*")
+    else if (token.type === "*")
     {
         var left = unparse(token.left)
         var right = unparse(token.right)

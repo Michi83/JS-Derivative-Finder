@@ -57,12 +57,25 @@ var parse = function(expression)
     
     var power = function()
     {
-        var token = factor()
+        var token = function_()
         if (lookahead.type === "^")
         {
             lookahead.left = token
             token = advance()
             token.right = sign()
+        }
+        return token
+    }
+    
+    var function_ = function()
+    {
+        var token = factor()
+        if (lookahead.type === "(")
+        {
+            lookahead.left = token
+            token = advance()
+            token.right = sum()
+            advance(")")
         }
         return token
     }
