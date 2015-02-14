@@ -8,146 +8,381 @@ var assert = function(condition, message)
 
 var tests =
 {
-    testTokenizeNumbers: function()
+    testTokenizeIntegers: function()
     {
-        var expression = "1 2.0 3.0e5 4e5"
+        var expression = "123"
         var tokenizer = new Tokenizer(expression)
         var token = tokenizer.nextToken()
-        assert(token.type === "number" && token.value === 1, "tokenization failed: 1")
-        token = tokenizer.nextToken()
-        assert(token.type === "number" && token.value === 2, "tokenization failed: 2")
-        token = tokenizer.nextToken()
-        assert(token.type === "number" && token.value === 300000, "tokenization failed: 300000")
-        token = tokenizer.nextToken()
-        assert(token.type === "number" && token.value === 400000, "tokenization failed: 400000")
+        assert(token.type === "number" && token.value === 123, "tokenization failed: 123")
     },
     
-    testTokenizeOperators: function()
+    testTokenizeFloats: function()
     {
-        var expression = "+-*/()^"
+        var expression = "123.456"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
+        assert(token.type === "number" && token.value === 123.456, "tokenization failed: 123.456")
+    },
+    
+    testTokenizeFloatsENotation: function()
+    {
+        var expression = "1.234e-56"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
+        assert(token.type === "number" && token.value === 1.234e-56, "tokenization failed: 1.234e-56")
+    },
+    
+    testTokenizePlus: function()
+    {
+        var expression = "+"
         var tokenizer = new Tokenizer(expression)
         var token = tokenizer.nextToken()
         assert(token.type === "+", "tokenization failed: +")
-        token = tokenizer.nextToken()
+    },
+    
+    testTokenizeMinus: function()
+    {
+        var expression = "-"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
         assert(token.type === "-", "tokenization failed: -")
-        token = tokenizer.nextToken()
+    },
+    
+    testTokenizeTimes: function()
+    {
+        var expression = "*"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
         assert(token.type === "*", "tokenization failed: *")
-        token = tokenizer.nextToken()
+    },
+    
+    testTokenizeSlash: function()
+    {
+        var expression = "/"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
         assert(token.type === "/", "tokenization failed: /")
-        token = tokenizer.nextToken()
-        assert(token.type === "(", "tokenization failed: (")
-        token = tokenizer.nextToken()
-        assert(token.type === ")", "tokenization failed: )")
-        token = tokenizer.nextToken()
+    },
+    
+    testTokenizePower: function()
+    {
+        var expression = "^"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
         assert(token.type === "^", "tokenization failed: ^")
+    },
+    
+    testTokenizeLeftParen: function()
+    {
+        var expression = "("
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
+        assert(token.type === "(", "tokenization failed: (")
+    },
+    
+    testTokenizeRightParen: function()
+    {
+        var expression = ")"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
+        assert(token.type === ")", "tokenization failed: )")
     },
     
     testTokenizeIdentifiers: function()
     {
-        var expression = "sin"
+        var expression = "Abc_123"
         var tokenizer = new Tokenizer(expression)
         var token = tokenizer.nextToken()
-        assert(token.type === "identifier" && token.value === "sin", "tokenization failed: sin")
+        assert(token.type === "identifier" && token.value === "Abc_123", "tokenization failed: Abc_123")
     },
     
-    testParser: function()
+    testTokenizeWhitespace: function()
     {
-        var token = parse("1 + 2 * 3")
-        assert(token.type === "+" && token.right.type === "*", "parsing failed: 1 + 2 * 3")
-        token = parse("(1 + 2) * 3")
-        assert(token.type === "*" && token.left.type === "+", "parsing failed: (1 + 2) * 3")
-        token = parse("a ^ b ^ c")
-        assert(token.type === "^" && token.left.type === "identifier" && token.left.value === "a" && token.right.type === "^", "parsing failed: a ^ b ^ c")
-        token = parse("-a ^ b")
-        assert(token.type === "~" && token.right.type === "^", "parsing failed: -a ^ b")
+        var expression = "\t\n\r a"
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
+        assert(token.type === "identifier", "tokenization failed: \t\n\r a")
     },
     
-    testUnparse: function()
+    testTokenizeEnd: function()
     {
-        var token = parse("(1 + 2) * 3")
+        var expression = ""
+        var tokenizer = new Tokenizer(expression)
+        var token = tokenizer.nextToken()
+        assert(token.type === "end", "tokenization failed: end")
+    },
+    
+    testParseAddition: function()
+    {
+        var expression = "a + b + c"
+        var token = parse(expression)
+        assert(token.type === "+" && token.left.type === "+" && token.right.type === "identifier", "parsing failed: a + b + c")
+    },
+    
+    testParseSubtraction: function()
+    {
+        var expression = "a - b - c"
+        var token = parse(expression)
+        assert(token.type === "-" && token.left.type === "-" && token.right.type === "identifier", "parsing failed: a - b - c")
+    },
+    
+    testParseMultiplication: function()
+    {
+        var expression = "a * b * c"
+        var token = parse(expression)
+        assert(token.type === "*" && token.left.type === "*" && token.right.type === "identifier", "parsing failed: a * b * c")
+    },
+    
+    testParseDivision: function()
+    {
+        var expression = "a / b / c"
+        var token = parse(expression)
+        assert(token.type === "/" && token.left.type === "/" && token.right.type === "identifier", "parsing failed: a / b / c")
+    },
+    
+    testParseNegation: function()
+    {
+        var expression = "--a"
+        var token = parse(expression)
+        assert(token.type === "~" && token.right.type === "~" && token.right.right.type === "identifier", "parsing failed: --a")
+    },
+    
+    testParsePower: function()
+    {
+        var expression = "a^b^c"
+        var token = parse(expression)
+        assert(token.type === "^" && token.left.type === "identifier" && token.right.type === "^", "parsing failed: a^b^c")
+    },
+    
+    testParsePowerWithParens: function()
+    {
+        var expression = "(a^b)^c"
+        var token = parse(expression)
+        assert(token.type === "^" && token.left.type === "^" && token.right.type === "identifier", "parsing failed: (a^b)^c")
+    },
+    
+    testParseFunction: function()
+    {
+        var expression = "sin(cos(1))"
+        var token = parse(expression)
+        assert(token.type === "(" && token.left.type === "identifier" && token.right.type === "(", "parsing failed: sin(cos(1))")
+    },
+    
+    testParsePrecedence: function()
+    {
+        var expression = "a + b * c"
+        var token = parse(expression)
+        assert(token.type === "+" && token.left.type === "identifier" && token.right.type === "*", "parsing failed: a + b * c")
+    },
+    
+    testParsePrecedenceWithParens: function()
+    {
+        var expression = "(a + b) * c"
+        var token = parse(expression)
+        assert(token.type === "*" && token.left.type === "+" && token.right.type === "identifier", "parsing failed: (a + b) * c")
+    },
+    
+    testParsePowerNegation: function()
+    {
+        var expression = "-a^b"
+        var token = parse(expression)
+        assert(token.type === "~" && token.right.type === "^", "parsing failed: -a^b")
+    },
+    
+    testParsePowerNegationWithParens: function()
+    {
+        var expression = "(-a)^b"
+        var token = parse(expression)
+        assert(token.type === "^" && token.left.type === "~", "parsing failed: (-a)^b")
+    },
+    
+    testUnparseBasicArithmetic: function()
+    {
+        var token = parse("-a + b - c * d / e^f(g)")
+        expression = unparse(token)
+        assert(expression === "-a + b - c * d / e^f(g)", "unparsing failed: -a + b - c * d / e^f(g)")
+    },
+    
+    testUnparseParens: function()
+    {
+        var token = parse("(a + b) * (c + d)")
         var expression = unparse(token)
-        assert(expression === "(1 + 2) * 3", "unparse test failed: (1 + 2) * 3")
-        token = parse("a^b^c")
-        expression = unparse(token)
-        assert(expression === "a^b^c", "unparse test failed: a^b^c")
-        token = parse("(a^b)^c")
-        expression = unparse(token)
-        assert(expression === "(a^b)^c", "unparse test failed: (a^b)^c")
-        token = parse("-a^b")
-        expression = unparse(token)
-        assert(expression === "-a^b", "unparse test failed: -a^b")
-        token = parse("(-a)^b")
-        expression = unparse(token)
-        assert(expression === "(-a)^b", "unparse test failed: (-a)^b")
+        assert(expression === "(a + b) * (c + d)", "unparsing failed: (a + b) * (c + d)")
     },
     
-    testSimplifyMultiplication: function()
+    testUnparsePower: function()
     {
-        var token = parse("1 * a")
-        simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of 1 * a failed")
-        token = parse("0 * a")
-        simplify(token)
-        assert(token.type === "number" && token.value === 0, "simplification of 0 * a failed")
-        token = parse("a * 1")
-        simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of a * 1 failed")
-        token = parse("a * 0")
-        simplify(token)
-        assert(token.type === "number" && token.value === 0, "simplification of a * 0 failed")
+        var token = parse("a^b^c")
+        var expression = unparse(token)
+        assert(expression === "a^b^c", "unparsing failed: a^b^c")
     },
     
-    testSimplifyAddition: function()
+    testUnparsePowerWithParens: function()
     {
-        var token = parse("0 + a")
-        simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of 0 + a failed")
-        token = parse("a + 0")
-        simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of a + 0 failed")
+        var token = parse("(a^b)^c")
+        var expression = unparse(token)
+        assert(expression === "(a^b)^c", "unparsing failed: (a^b)^c")
     },
     
-    testSimplifySubtraction: function()
+    testUnparsePowerNegation: function()
     {
-        var token = parse("0 - a")
-        simplify(token)
-        assert(token.type === "~" && token.right.value === "a", "simplification of 0 - a failed")
-        token = parse("a - 0")
-        simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of a - 0 failed")
+        var token = parse("-a^b")
+        var expression = unparse(token)
+        assert(expression === "-a^b", "unparsing failed: -a^b")
     },
     
-    testSimplifyDivision: function()
+    testUnparsePowerNegationWithParens: function()
     {
-        var token = parse("0 / a")
-        simplify(token)
-        assert(token.type === "number" && token.value === 0, "simplification of 0 / a failed")
-        token = parse("a / 1")
-        simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of a / 1 failed")
+        var token = parse("(-a)^b")
+        var expression = unparse(token)
+        assert(expression === "(-a)^b", "unparsing failed: (-a)^b")
     },
     
-    testSimplifyNegation: function()
+    testSimplifyNumberPlusNumber: function()
+    {
+        var token = parse("10 + 5")
+        simplify(token)
+        assert(token.type === "number" && token.value === 15, "simplification of 10 + 5 failed")
+    },
+    
+    testSimplifyNumberMinusNumber: function()
+    {
+        var token = parse("10 - 5")
+        simplify(token)
+        assert(token.type === "number" && token.value === 5, "simplification of 10 - 5 failed")
+    },
+    
+    testSimplifyNumberTimesNumber: function()
+    {
+        var token = parse("10 * 5")
+        simplify(token)
+        assert(token.type === "number" && token.value === 50, "simplification of 10 * 5 failed")
+    },
+    
+    testSimplifyNumberSlashNumber: function()
+    {
+        var token = parse("10 / 5")
+        simplify(token)
+        assert(token.type === "number" && token.value === 2, "simplification of 10 / 5 failed")
+    },
+    
+    testSimplifyMinusNumber: function()
+    {
+        var token = parse("-10")
+        simplify(token)
+        assert(token.type === "number" && token.value === -10, "simplification of -10 failed")
+    },
+    
+    testSimplifyMinusZero: function()
     {
         var token = parse("-0")
         simplify(token)
         assert(token.type === "number" && token.value === 0, "simplification of -0 failed")
     },
     
-    testSimplifyPower: function()
+    testSimplifyNumberToTheNumberthPower: function()
     {
-        var token = parse("a ^ 0")
+        var token = parse("10^5")
         simplify(token)
-        assert(token.type === "number" && token.value === 1, "simplification of a ^ 0 failed")
-        token = parse("a ^ 1")
+        assert(token.type === "number" && token.value === 100000, "simplification of 10^5 failed")
+    },
+    
+    testSimplifyZeroPlusA: function()
+    {
+        var token = parse("0 + a")
         simplify(token)
-        assert(token.type === "identifier" && token.value === "a", "simplification of a ^ 1 failed")
-        token = parse("0 ^ a")
+        assert(token.type === "identifier" && token.value === "a", "simplification of 0 + a failed")
+    },
+    
+    testSimplifyAPlusZero: function()
+    {
+        var token = parse("a + 0")
         simplify(token)
-        assert(token.type === "number" && token.value === 0, "simplification of 0 ^ a failed")
-        token = parse("1 ^ a")
+        assert(token.type === "identifier" && token.value === "a", "simplification of a + 0 failed")
+    },
+    
+    testSimplifyZeroMinusA: function()
+    {
+        var token = parse("0 - a")
         simplify(token)
-        assert(token.type === "number" && token.value === 1, "simplification of 1 ^ a failed")
+        assert(token.type === "~" && token.right.type === "identifier", "simplification of 0 - a failed")
+    },
+    
+    testSimplifyAMinusZero: function()
+    {
+        var token = parse("a - 0")
+        simplify(token)
+        assert(token.type === "identifier" && token.value === "a", "simplification of a - 0 failed")
+    },
+    
+    testSimplifyZeroTimesA: function()
+    {
+        var token = parse("0 * a")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of 0 * a failed")
+    },
+    
+    testSimplifyZeroTimesA: function()
+    {
+        var token = parse("a * 0")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of a * 0 failed")
+    },
+    
+    testSimplifyOneTimesA: function()
+    {
+        var token = parse("1 * a")
+        simplify(token)
+        assert(token.type === "identifier" && token.value === "a", "simplification of 1 * a failed")
+    },
+    
+    testSimplifyATimesOne: function()
+    {
+        var token = parse("a * 1")
+        simplify(token)
+        assert(token.type === "identifier" && token.value === "a", "simplification of a * 1 failed")
+    },
+    
+    testSimplifyZeroSlashA: function()
+    {
+        var token = parse("0 / a")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of 0 / a failed")
+    },
+    
+    testSimplifyASlashOne: function()
+    {
+        var token = parse("a / 1")
+        simplify(token)
+        assert(token.type === "identifier" && token.value === "a", "simplification of a / 1 failed")
+    },
+    
+    testSimplifyZeroToTheAthPower: function()
+    {
+        var token = parse("0^a")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of 0^a failed")
+    },
+    
+    testSimplifyAToTheZerothPower: function()
+    {
+        var token = parse("a^0")
+        simplify(token)
+        assert(token.type === "number" && token.value === 1, "simplification of a^0 failed")
+    },
+    
+    testSimplifyOneToTheAthPower: function()
+    {
+        var token = parse("1^a")
+        simplify(token)
+        assert(token.type === "number" && token.value === 1, "simplification of 1^a failed")
+    },
+    
+    testSimplifyAToTheFirstPower: function()
+    {
+        var token = parse("a^1")
+        simplify(token)
+        assert(token.type === "identifier" && token.value === "a", "simplification of a^1 failed")
     },
     
     testDeriveX: function()
