@@ -479,6 +479,30 @@ var tests =
     {
         var derivative = deriveExpression("cos(sin(x))")
         assert(derivative === "-sin(sin(x)) * cos(x)", "derivation failed: cos(sin(x))")
+    },
+    
+    testDeriveTangent: function()
+    {
+        var derivative = deriveExpression("tan(x)")
+        assert(derivative === "1 / cos(x)^2", "derivation failed: tan(x)")
+    },
+    
+    testDeriveTangentWithChainRule: function()
+    {
+        var derivative = deriveExpression("tan(x^2)")
+        assert(derivative === "1 / cos(x^2)^2 * 2 * x", "derivation failed: tan(x^2)")
+    },
+    
+    testDeriveLogarithm: function()
+    {
+        var derivative = deriveExpression("ln(x)")
+        assert(derivative === "1 / x", "derivation failed: ln(x)")
+    },
+    
+    testDeriveLogarithmWithChainRule: function()
+    {
+        var derivative = deriveExpression("ln(x^2)")
+        assert(derivative === "1 / x^2 * 2 * x", "derivation failed: ln(x^2)")
     }
 }
 

@@ -1,3 +1,8 @@
+/*
+ * Derives a syntax tree. Call it on the root token and recursion will take care
+ * of the entire tree. Note that this functions constructs a new tree instead of
+ * modifying the original tree.
+ */
 var derive = function(token)
 {
     // functions
@@ -33,6 +38,40 @@ var derive = function(token)
                     undefined,
                     new Token("(", undefined, new Token("identifier", "sin"), token.right.deepCopy())
                 ),
+                derive(token.right)
+            )
+        }
+        // tangent
+        else if (token.left.value === "tan")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "/",
+                    undefined,
+                    new Token("number", 1),
+                    new Token
+                    (
+                        "^",
+                        undefined,
+                        new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
+                        new Token("number", 2)
+                    )
+                ),
+                derive(token.right)
+            )
+        }
+        // natural logarithm
+        else if (token.left.value === "ln")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token("/", undefined, new Token("number", 1), token.right.deepCopy()),
                 derive(token.right)
             )
         }
@@ -134,10 +173,18 @@ var derive = function(token)
     }
 }
 
+/*
+ * Derives an expression string and returns the derivative as a string.
+ */
 var deriveExpression = function(expression)
 {
     var token = parse(expression)
     token = derive(token)
+    // Now we unparse the syntax tree and parse it right back. This seems stupid
+    // but sometimes it "cleans" the syntax tree making it easier for simplify
+    // to digest.
+    var temp = unparse(token)
+    token = parse(temp)
     simplify(token)
     return unparse(token)
 }
