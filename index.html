@@ -15,10 +15,8 @@
                 var expression = document.getElementById("expression").value
                 try
                 {
-                    var token = parse(expression)
-                    var derivative = derive(token)
-                    simplify(derivative)
-                    document.getElementById("derivative").innerHTML = unparse(derivative)
+                    var derivative = deriveExpression(expression)
+                    document.getElementById("derivative").innerHTML = derivative
                 }
                 catch (exception)
                 {
@@ -31,12 +29,12 @@
     </head>
     <body>
         <div>
-            f(x) =
+            y =
             <input id="expression" type="text" />
             <input onclick="processInput()" type="button" value="derive" />
         </div>
         <div>
-            df/dx =
+            dy/dx =
             <span id="derivative"></span>
         </div>
     </body>

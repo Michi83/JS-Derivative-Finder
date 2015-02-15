@@ -385,21 +385,101 @@ var tests =
         assert(token.type === "identifier" && token.value === "a", "simplification of a^1 failed")
     },
     
+    testDeriveNumber: function()
+    {
+        var derivative = deriveExpression("10")
+        assert(derivative === "0", "derivation failed: 10")
+    },
+    
+    testDeriveConstant: function()
+    {
+        var derivative = deriveExpression("a")
+        assert(derivative === "0", "derivation failed: a")
+    },
+    
     testDeriveX: function()
     {
-        var token = parse("x")
-        token = derive(token)
-        simplify(token)
-        assert(unparse(token) === "1", "derivation of x failed")
+        var derivative = deriveExpression("x")
+        assert(derivative === "1", "derivation failed: x")
+    },
+    
+    testDeriveAddition: function()
+    {
+        var derivative = deriveExpression("x^3 + x^2")
+        assert(derivative === "3 * x^2 + 2 * x", "derivation failed: x^3 + x^2")
+    },
+    
+    testDeriveSubtraction: function()
+    {
+        var derivative = deriveExpression("x^3 - x^2")
+        assert(derivative === "3 * x^2 - 2 * x", "derivation failed: x^3 - x^2")
+    },
+    
+    testDeriveMultiplication: function()
+    {
+        var derivative = deriveExpression("x^3 * x^2")
+        assert(derivative === "3 * x^2 * x^2 + x^3 * 2 * x", "derivation failed: x^3 * x^2")
+    },
+    
+    testDeriveDivision: function()
+    {
+        var derivative = deriveExpression("x^3 / x^2")
+        assert(derivative === "(3 * x^2 * x^2 - x^3 * 2 * x) / (x^2)^2", "derivation failed: x^3 / x^2")
+    },
+    
+    testDeriveNegation: function()
+    {
+        var derivative = deriveExpression("-x^3")
+        assert(derivative === "-(3 * x^2)", "derivation failed: -x^3")
     },
     
     testDeriveXToTheNthPower: function()
     {
-        var token = parse("x^3")
-        token = derive(token)
-        simplify(token)
-        assert(unparse(token) === "3 * x^2", "derivation of x^3 failed")
+        var derivative = deriveExpression("x^3")
+        assert(derivative === "3 * x^2", "derivation failed: x^3")
     },
+    
+    testDeriveXToTheNthPowerWithChainRule: function()
+    {
+        var derivative = deriveExpression("sin(x)^3")
+        assert(derivative === "3 * sin(x)^2 * cos(x)", "derivation failed: sin(x)^3")
+    },
+    
+    testDeriveEToTheXthPower: function()
+    {
+        var derivative = deriveExpression("e^x")
+        assert(derivative === "e^x", "derivation failed: e^x")
+    },
+    
+    testDeriveEToTheXthPowerWithChainRule: function()
+    {
+        var derivative = deriveExpression("e^sin(x)")
+        assert(derivative === "e^sin(x) * cos(x)", "derivation failed: e^sin(x)")
+    },
+    
+    testDeriveSine: function()
+    {
+        var derivative = deriveExpression("sin(x)")
+        assert(derivative === "cos(x)", "derivation failed: sin(x)")
+    },
+    
+    testDeriveSineWithChainRule: function()
+    {
+        var derivative = deriveExpression("sin(cos(x))")
+        assert(derivative === "cos(cos(x)) * -sin(x)", "derivation failed: sin(cos(x))")
+    },
+    
+    testDeriveCosine: function()
+    {
+        var derivative = deriveExpression("cos(x)")
+        assert(derivative === "-sin(x)", "derivation failed: cos(x)")
+    },
+    
+    testDeriveCosineWithChainRule: function()
+    {
+        var derivative = deriveExpression("cos(sin(x))")
+        assert(derivative === "-sin(sin(x)) * cos(x)", "derivation failed: cos(sin(x))")
+    }
 }
 
 var runTests = function()

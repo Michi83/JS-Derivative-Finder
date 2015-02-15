@@ -1,6 +1,48 @@
 var derive = function(token)
 {
-    if (token.type === "*")
+    // functions
+    if (token.type === "(")
+    {
+        // left child must be an identifier
+        if (token.left.type !== "identifier")
+        {
+            throw "derivative not implemented"
+        }
+        // sine
+        if (token.left.value === "sin")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
+                derive(token.right)
+            )
+        }
+        // cosine
+        else if (token.left.value === "cos")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "~",
+                    undefined,
+                    undefined,
+                    new Token("(", undefined, new Token("identifier", "sin"), token.right.deepCopy())
+                ),
+                derive(token.right)
+            )
+        }
+        else
+        {
+            throw "derivative not implemented"
+        }
+    }
+    // *
+    else if (token.type === "*")
     {
         return new Token
         (
@@ -10,14 +52,17 @@ var derive = function(token)
             new Token("*", undefined, token.left.deepCopy(), derive(token.right))
         )
     }
+    // +
     else if (token.type === "+")
     {
         return new Token("+", undefined, derive(token.left), derive(token.right))
     }
+    // -
     else if (token.type === "-")
     {
         return new Token("-", undefined, derive(token.left), derive(token.right))
     }
+    // /
     else if (token.type === "/")
     {
         return new Token
@@ -34,6 +79,7 @@ var derive = function(token)
             new Token("^", undefined, token.right.deepCopy(), new Token("number", 2))
         )
     }
+    // ^
     else if (token.type === "^")
     {
         if (token.right.type === "number")
@@ -61,6 +107,7 @@ var derive = function(token)
             throw "derivative not implemented"
         }
     }
+    // constants
     else if (token.type === "identifier")
     {
         if (token.value === "x")
@@ -76,8 +123,21 @@ var derive = function(token)
     {
         return new Token("number", 0)
     }
+    // unary -
     else if (token.type === "~")
     {
         return new Token("~", undefined, undefined, derive(token.right))
     }
+    else
+    {
+        throw "derivative not implemented"
+    }
+}
+
+var deriveExpression = function(expression)
+{
+    var token = parse(expression)
+    token = derive(token)
+    simplify(token)
+    return unparse(token)
 }
