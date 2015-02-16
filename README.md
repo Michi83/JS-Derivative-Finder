@@ -8,3 +8,7 @@ A simple JavaScript program to find derivatives of functions. Easily embeddable 
 2. Call deriveExpression on an expression string. Example: deriveExpression("x^2") will return "2 * x"
 
 At the moment the following operators and functions are supported: +, -, *, /, ^, sin, cos, tan, ln
+
+## Demo
+
+A demo can be found here: [michi83.github.io/JS-Derivative-Finder/](http://michi83.github.io/JS-Derivative-Finder/)
