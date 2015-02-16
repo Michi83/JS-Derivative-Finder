@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script src="js/derive.js"></script>
+        <script>
+            var processInput = function()
+            {
+                var expression = document.getElementById("expression").value
+                try
+                {
+                    var derivative = deriveExpression(expression)
+                    document.getElementById("derivative").innerHTML = derivative
+                }
+                catch (exception)
+                {
+                    console.log(exception)
+                    document.getElementById("derivative").innerHTML = "sorry, I couldn't derive that"
+                }
+            }
+        </script>
+        <title>Derive</title>
+    </head>
+    <body>
+        <a href="https://github.com/Michi83/JS-Derivative-Finder"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+        <div>
+            y =
+            <input id="expression" type="text" />
+            <input onclick="processInput()" type="button" value="derive" />
+        </div>
+        <div>
+            dy/dx =
+            <span id="derivative"></span>
+            <p>
+                Supported operators: +, -, *, /, ^<br />
+                Supported functions: sin, cos, tan, ln
+            </p>
+        </div>
+    </body>
+</html>
