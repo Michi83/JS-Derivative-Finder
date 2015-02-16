@@ -445,6 +445,18 @@ var tests =
         assert(derivative === "3 * sin(x)^2 * cos(x)", "derivation failed: sin(x)^3")
     },
     
+    testDeriveXToConstantPower: function()
+    {
+        var derivative = deriveExpression("x^c")
+        assert(derivative === "c * x^(c - 1)", "derivation failed: x^c")
+    },
+    
+    testDeriveXToConstantPowerWithChainRule: function()
+    {
+        var derivative = deriveExpression("sin(x)^c")
+        assert(derivative === "c * sin(x)^(c - 1) * cos(x)", "derivation failed: sin(x)^c")
+    },
+    
     testDeriveEToTheXthPower: function()
     {
         var derivative = deriveExpression("e^x")

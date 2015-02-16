@@ -650,6 +650,28 @@ var derive = function(token)
                 derive(token.left)
             )
         }
+        else if (token.right.type === "identifier" && token.right.value !== "x")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "*",
+                    undefined,
+                    token.right.deepCopy(),
+                    new Token
+                    (
+                        "^",
+                        undefined,
+                        token.left.deepCopy(),
+                        new Token("-", undefined, token.right.deepCopy(), new Token("number", 1))
+                    )
+                ),
+                derive(token.left)
+            )
+        }
         else if (token.left.type === "identifier" && token.left.value === "e")
         {
             return new Token("*", undefined, token.deepCopy(), derive(token.right))
@@ -692,12 +714,12 @@ var derive = function(token)
 var deriveExpression = function(expression)
 {
     var token = parse(expression)
+    simplify(token)
     token = derive(token)
     // Now we unparse the syntax tree and parse it right back. This seems stupid
     // but sometimes it "cleans" the syntax tree making it easier for simplify
     // to digest.
-    var temp = unparse(token)
-    token = parse(temp)
+    token = parse(unparse(token))
     simplify(token)
     return unparse(token)
 }
