@@ -1,3 +1,13 @@
+/*
+ * The basic idea of this script is to construct a syntax tree from a
+ * mathematical expression and to apply differentiation rules to it. Also some
+ * algebraic simplifications are applied.
+ */
+
+/*
+ * The basic building block of syntax trees. The attributes left and right are
+ * meant to be other tokens or undefined.
+ */
 var Token = function(type, value, left, right)
 {
     this.setAttributes(type, value, left, right)
@@ -31,9 +41,39 @@ Token.prototype =
         this.value = value
         this.left = left
         this.right = right
+    },
+    
+    /*
+     * Determines if this token is the root of a constant subtree (i.e. a
+     * subtree that does not contain the identifier x)
+     */
+    isConstant: function()
+    {
+        if (this.type === "identifier" && this.value === "x")
+        {
+            return false
+        }
+        if (this.left !== undefined && !this.left.isConstant())
+        {
+            return false
+        }
+        if (this.right !== undefined && !this.right.isConstant())
+        {
+            return false
+        }
+        return true
     }
 }
 
+/*
+ * Decomposes an expression string. Usage: Create a new Tokenizer object and
+ * repeatedly call its nextToken method, e.g.
+ * var tokenizer = new Tokenizer("2 * x")
+ * tokenizer.nextToken() --> 2
+ * tokenizer.nextToken() --> *
+ * tokenizer.nextToken() --> x
+ * tokenizer.nextToken() --> end
+ */
 var Tokenizer = function(expression)
 {
     this.expression = expression + "\0"
@@ -130,6 +170,9 @@ Tokenizer.prototype =
     }
 }
 
+/*
+ * Constructs a syntax tree using recursive descent.
+ */
 var parse = function(expression)
 {
     var advance = function(expected)
@@ -242,6 +285,10 @@ var parse = function(expression)
     return token
 }
 
+/*
+ * The unparse function needs this to determine when to put parentheses around a
+ * subexpression.
+ */
 var precedence =
 {
     "*": 1,
@@ -254,6 +301,9 @@ var precedence =
     "~": 2
 }
 
+/*
+ * Generates an expression string from a syntax tree.
+ */
 var unparse = function(token)
 {
     // ()
@@ -361,7 +411,62 @@ var simplify = function(token)
     }
     simplify(token.left)
     simplify(token.right)
-    if (token.type === "*")
+    if (token.type === "(")
+    {
+        if (token.left.type !== "identifier")
+        {
+            throw "function names must be identifiers"
+        }
+        if (token.left.value === "sin")
+        {
+            var right = unparse(token.right)
+            if (right === "0")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "pi / 2")
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+            else if (right === "pi")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "3 * pi / 2")
+            {
+                token.setAttributes("number", -1)
+                return
+            }
+        }
+        else if (token.left.value === "cos")
+        {
+            var right = unparse(token.right)
+            if (right === "0")
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+            else if (right === "pi / 2")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "pi")
+            {
+                token.setAttributes("number", -1)
+                return
+            }
+            else if (right === "3 * pi / 2")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+        }
+    }
+    else if (token.type === "*")
     {
         if (token.left.type === "number" && token.right.type === "number")
         {
@@ -651,23 +756,7 @@ var derive = function(token)
     // ^
     else if (token.type === "^")
     {
-        if (token.right.type === "number")
-        {
-            return new Token
-            (
-                "*",
-                undefined,
-                new Token
-                (
-                    "*",
-                    undefined,
-                    new Token("number", token.right.value),
-                    new Token("^", undefined, token.left.deepCopy(), new Token("number", token.right.value - 1))
-                ),
-                derive(token.left)
-            )
-        }
-        else if (token.right.type === "identifier" && token.right.value !== "x")
+        if (token.right.isConstant())
         {
             return new Token
             (
