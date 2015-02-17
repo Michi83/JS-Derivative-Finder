@@ -465,6 +465,20 @@ var simplify = function(token)
                 return
             }
         }
+        else if (token.left.value === "tan")
+        {
+            var right = unparse(token.right)
+            if (right === "0")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "pi")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+        }
         else if (token.left.value === "ln")
         {
             var right = unparse(token.right)
@@ -666,7 +680,7 @@ var derive = function(token)
         // left child must be an identifier
         if (token.left.type !== "identifier")
         {
-            throw "derivative not implemented"
+            throw "function names must be identifiers"
         }
         // sine
         if (token.left.value === "sin")

@@ -469,6 +469,34 @@ var tests =
         assert(token.type === "number" && token.value === 0, "simplification of cos(3 * pi / 2) failed")
     },
     
+    testSimplifyTanZero: function()
+    {
+        var token = parse("tan(0)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of tan(0) failed")
+    },
+    
+    testSimplifyTanPi: function()
+    {
+        var token = parse("tan(pi)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of tan(pi) failed")
+    },
+    
+    testSimplifyLnOne: function()
+    {
+        var token = parse("ln(1)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of ln(1) failed")
+    },
+    
+    testSimplifyLnE: function()
+    {
+        var token = parse("ln(e)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 1, "simplification of ln(e) failed")
+    },
+    
     testDeriveNumber: function()
     {
         var derivative = deriveExpression("10")
