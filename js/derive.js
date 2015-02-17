@@ -1,3 +1,13 @@
+/*
+ * The basic idea of this script is to construct a syntax tree from a
+ * mathematical expression and to apply differentiation rules to it. Also some
+ * algebraic simplifications are applied.
+ */
+
+/*
+ * The basic building block of syntax trees. The attributes left and right are
+ * meant to be other tokens or undefined.
+ */
 var Token = function(type, value, left, right)
 {
     this.setAttributes(type, value, left, right)
@@ -34,6 +44,15 @@ Token.prototype =
     }
 }
 
+/*
+ * Decomposes an expression string. Usage: Create a new Tokenizer object and
+ * repeatedly call its nextToken method, e.g.
+ * var tokenizer = new Tokenizer("2 * x")
+ * tokenizer.nextToken() --> 2
+ * tokenizer.nextToken() --> *
+ * tokenizer.nextToken() --> x
+ * tokenizer.nextToken() --> end
+ */
 var Tokenizer = function(expression)
 {
     this.expression = expression + "\0"
@@ -130,6 +149,9 @@ Tokenizer.prototype =
     }
 }
 
+/*
+ * Constructs a syntax tree using recursive descent.
+ */
 var parse = function(expression)
 {
     var advance = function(expected)
@@ -242,6 +264,10 @@ var parse = function(expression)
     return token
 }
 
+/*
+ * The unparse function needs this to determine when to put parentheses around a
+ * subexpression.
+ */
 var precedence =
 {
     "*": 1,
@@ -254,6 +280,9 @@ var precedence =
     "~": 2
 }
 
+/*
+ * Generates an expression string from a syntax tree.
+ */
 var unparse = function(token)
 {
     // ()
