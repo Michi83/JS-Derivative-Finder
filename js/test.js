@@ -553,6 +553,18 @@ var tests =
         assert(derivative === "e^sin(x) * cos(x)", "derivation failed: e^sin(x)")
     },
     
+    testDeriveConstantToTheXthPower: function()
+    {
+        var derivative = deriveExpression("sin(1)^x")
+        assert(derivative === "sin(1)^x * ln(sin(1))", "derivation failed: sin(1)^x")
+    },
+    
+    testDeriveConstantToTheXthPowerWithChainRule: function()
+    {
+        var derivative = deriveExpression("sin(1)^sin(x)")
+        assert(derivative === "sin(1)^sin(x) * ln(sin(1)) * cos(x)", "derivation failed: sin(1)^sin(x)")
+    },
+    
     testDeriveSine: function()
     {
         var derivative = deriveExpression("sin(x)")
