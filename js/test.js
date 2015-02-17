@@ -475,14 +475,14 @@ var tests =
     
     testDeriveXToConstantPower: function()
     {
-        var derivative = deriveExpression("x^c")
-        assert(derivative === "c * x^(c - 1)", "derivation failed: x^c")
+        var derivative = deriveExpression("x^sin(1)")
+        assert(derivative === "sin(1) * x^(sin(1) - 1)", "derivation failed: x^sin(1)")
     },
     
     testDeriveXToConstantPowerWithChainRule: function()
     {
-        var derivative = deriveExpression("sin(x)^c")
-        assert(derivative === "c * sin(x)^(c - 1) * cos(x)", "derivation failed: sin(x)^c")
+        var derivative = deriveExpression("sin(x)^sin(1)")
+        assert(derivative === "sin(1) * sin(x)^(sin(1) - 1) * cos(x)", "derivation failed: sin(x)^sin(1)")
     },
     
     testDeriveEToTheXthPower: function()

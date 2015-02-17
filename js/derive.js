@@ -41,6 +41,27 @@ Token.prototype =
         this.value = value
         this.left = left
         this.right = right
+    },
+    
+    /*
+     * Determines if this token is the root of a constant subtree (i.e. a
+     * subtree that does not contain the identifier x)
+     */
+    isConstant: function()
+    {
+        if (this.type === "identifier" && this.value === "x")
+        {
+            return false
+        }
+        if (this.left !== undefined && !this.left.isConstant())
+        {
+            return false
+        }
+        if (this.right !== undefined && !this.right.isConstant())
+        {
+            return false
+        }
+        return true
     }
 }
 
@@ -680,23 +701,7 @@ var derive = function(token)
     // ^
     else if (token.type === "^")
     {
-        if (token.right.type === "number")
-        {
-            return new Token
-            (
-                "*",
-                undefined,
-                new Token
-                (
-                    "*",
-                    undefined,
-                    new Token("number", token.right.value),
-                    new Token("^", undefined, token.left.deepCopy(), new Token("number", token.right.value - 1))
-                ),
-                derive(token.left)
-            )
-        }
-        else if (token.right.type === "identifier" && token.right.value !== "x")
+        if (token.right.isConstant())
         {
             return new Token
             (
