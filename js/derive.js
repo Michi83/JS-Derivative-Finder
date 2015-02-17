@@ -465,6 +465,34 @@ var simplify = function(token)
                 return
             }
         }
+        else if (token.left.value === "tan")
+        {
+            var right = unparse(token.right)
+            if (right === "0")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "pi")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+        }
+        else if (token.left.value === "ln")
+        {
+            var right = unparse(token.right)
+            if (right === "1")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "e")
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+        }
     }
     else if (token.type === "*")
     {
@@ -652,7 +680,7 @@ var derive = function(token)
         // left child must be an identifier
         if (token.left.type !== "identifier")
         {
-            throw "derivative not implemented"
+            throw "function names must be identifiers"
         }
         // sine
         if (token.left.value === "sin")
@@ -756,6 +784,7 @@ var derive = function(token)
     // ^
     else if (token.type === "^")
     {
+        // f(x)^c --> c * f(x)^(c - 1) * f'(x)
         if (token.right.isConstant())
         {
             return new Token
@@ -778,9 +807,22 @@ var derive = function(token)
                 derive(token.left)
             )
         }
-        else if (token.left.type === "identifier" && token.left.value === "e")
+        // c^f(x) --> c^f(x) * ln(c) * f'(x)
+        else if (token.left.isConstant())
         {
-            return new Token("*", undefined, token.deepCopy(), derive(token.right))
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "*",
+                    undefined,
+                    token.deepCopy(),
+                    new Token("(", undefined, new Token("identifier", "ln"), token.left.deepCopy())
+                ),
+                derive(token.right)
+            )
         }
         else
         {
