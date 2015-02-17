@@ -447,7 +447,30 @@ var simplify = function(token)
     {
         if (token.left.type === "number" && token.right.type === "number")
         {
-            token.setAttributes("number", token.left.value / token.right.value)
+            var euclid = function(a, b)
+            {
+                while (b !== 0)
+                {
+                    var temp = b
+                    b = a % b
+                    a = temp
+                }
+                return a
+            }
+            var gcd = euclid(token.left.value, token.right.value)
+            if (Math.sign(gcd) !== Math.sign(token.right.value))
+            {
+                gcd = -gcd
+            }
+            if (gcd === token.right.value)
+            {
+                token.setAttributes("number", token.left.value / token.right.value)
+            }
+            else
+            {
+                token.left.setAttributes("number", token.left.value / gcd)
+                token.right.setAttributes("number", token.right.value / gcd)
+            }
             return
         }
         if (token.left.type === "number")

@@ -266,6 +266,34 @@ var tests =
         assert(token.type === "number" && token.value === 2, "simplification of 10 / 5 failed")
     },
     
+    testSimplifyReduceFraction: function()
+    {
+        var token = parse("2 / 4")
+        simplify(token)
+        assert(token.left.value === 1 && token.right.value === 2, "simplification of 2 / 4 failed")
+    },
+    
+    testSimplifyReduceFractionWithNegativeNumerator: function()
+    {
+        var token = parse("-2 / 4")
+        simplify(token)
+        assert(token.left.value === -1 && token.right.value === 2, "simplification of -2 / 4 failed")
+    },
+    
+    testSimplifyReduceFractionWithNegativeDenominator: function()
+    {
+        var token = parse("2 / -4")
+        simplify(token)
+        assert(token.left.value === -1 && token.right.value === 2, "simplification of 2 / -4 failed")
+    },
+    
+    testSimplifyReduceFractionWithNegativeNumeratorAndDenominator: function()
+    {
+        var token = parse("-2 / -4")
+        simplify(token)
+        assert(token.left.value === 1 && token.right.value === 2, "simplification of -2 / -4 failed")
+    },
+    
     testSimplifyMinusNumber: function()
     {
         var token = parse("-10")
