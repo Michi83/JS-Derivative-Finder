@@ -447,7 +447,30 @@ var simplify = function(token)
     {
         if (token.left.type === "number" && token.right.type === "number")
         {
-            token.setAttributes("number", token.left.value / token.right.value)
+            var euclid = function(a, b)
+            {
+                while (b !== 0)
+                {
+                    var temp = b
+                    b = a % b
+                    a = temp
+                }
+                return a
+            }
+            var gcd = euclid(token.left.value, token.right.value)
+            if (Math.sign(gcd) !== Math.sign(token.right.value))
+            {
+                gcd = -gcd
+            }
+            if (gcd === token.right.value)
+            {
+                token.setAttributes("number", token.left.value / token.right.value)
+            }
+            else
+            {
+                token.left.setAttributes("number", token.left.value / gcd)
+                token.right.setAttributes("number", token.right.value / gcd)
+            }
             return
         }
         if (token.left.type === "number")
@@ -559,22 +582,16 @@ var derive = function(token)
         {
             return new Token
             (
-                "*",
+                "/",
                 undefined,
+                derive(token.right),
                 new Token
                 (
-                    "/",
+                    "^",
                     undefined,
-                    new Token("number", 1),
-                    new Token
-                    (
-                        "^",
-                        undefined,
-                        new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
-                        new Token("number", 2)
-                    )
-                ),
-                derive(token.right)
+                    new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
+                    new Token("number", 2)
+                )
             )
         }
         // natural logarithm
@@ -582,10 +599,10 @@ var derive = function(token)
         {
             return new Token
             (
-                "*",
+                "/",
                 undefined,
-                new Token("/", undefined, new Token("number", 1), token.right.deepCopy()),
-                derive(token.right)
+                derive(token.right),
+                token.right.deepCopy()
             )
         }
         else
