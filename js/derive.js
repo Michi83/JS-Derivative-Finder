@@ -411,7 +411,62 @@ var simplify = function(token)
     }
     simplify(token.left)
     simplify(token.right)
-    if (token.type === "*")
+    if (token.type === "(")
+    {
+        if (token.left.type !== "identifier")
+        {
+            throw "function names must be identifiers"
+        }
+        if (token.left.value === "sin")
+        {
+            var right = unparse(token.right)
+            if (right === "0")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "pi / 2")
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+            else if (right === "pi")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "3 * pi / 2")
+            {
+                token.setAttributes("number", -1)
+                return
+            }
+        }
+        else if (token.left.value === "cos")
+        {
+            var right = unparse(token.right)
+            if (right === "0")
+            {
+                token.setAttributes("number", 1)
+                return
+            }
+            else if (right === "pi / 2")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+            else if (right === "pi")
+            {
+                token.setAttributes("number", -1)
+                return
+            }
+            else if (right === "3 * pi / 2")
+            {
+                token.setAttributes("number", 0)
+                return
+            }
+        }
+    }
+    else if (token.type === "*")
     {
         if (token.left.type === "number" && token.right.type === "number")
         {

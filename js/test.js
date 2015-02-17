@@ -413,6 +413,62 @@ var tests =
         assert(token.type === "identifier" && token.value === "a", "simplification of a^1 failed")
     },
     
+    testSimplifySinZero: function()
+    {
+        var token = parse("sin(0)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of sin(0) failed")
+    },
+    
+    testSimplifySinHalfPi: function()
+    {
+        var token = parse("sin(pi / 2)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 1, "simplification of sin(pi / 2) failed")
+    },
+    
+    testSimplifySinPi: function()
+    {
+        var token = parse("sin(pi)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of sin(pi) failed")
+    },
+    
+    testSimplifySinThreeTimesHalfPi: function()
+    {
+        var token = parse("sin(3 * pi / 2)")
+        simplify(token)
+        assert(token.type === "number" && token.value === -1, "simplification of sin(3 * pi / 2) failed")
+    },
+    
+    testSimplifyCosZero: function()
+    {
+        var token = parse("cos(0)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 1, "simplification of cos(0) failed")
+    },
+    
+    testSimplifyCosHalfPi: function()
+    {
+        var token = parse("cos(pi / 2)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of cos(pi / 2) failed")
+    },
+    
+    testSimplifyCosPi: function()
+    {
+        var token = parse("cos(pi)")
+        simplify(token)
+        assert(token.type === "number" && token.value === -1, "simplification of cos(pi) failed")
+    },
+    
+    testSimplifyCosThreeTimesHalfPi: function()
+    {
+        var token = parse("cos(3 * pi / 2)")
+        simplify(token)
+        assert(token.type === "number" && token.value === 0, "simplification of cos(3 * pi / 2) failed")
+    },
+    
     testDeriveNumber: function()
     {
         var derivative = deriveExpression("10")
