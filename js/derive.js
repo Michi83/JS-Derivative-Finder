@@ -559,22 +559,16 @@ var derive = function(token)
         {
             return new Token
             (
-                "*",
+                "/",
                 undefined,
+                derive(token.right),
                 new Token
                 (
-                    "/",
+                    "^",
                     undefined,
-                    new Token("number", 1),
-                    new Token
-                    (
-                        "^",
-                        undefined,
-                        new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
-                        new Token("number", 2)
-                    )
-                ),
-                derive(token.right)
+                    new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
+                    new Token("number", 2)
+                )
             )
         }
         // natural logarithm
@@ -582,10 +576,10 @@ var derive = function(token)
         {
             return new Token
             (
-                "*",
+                "/",
                 undefined,
-                new Token("/", undefined, new Token("number", 1), token.right.deepCopy()),
-                derive(token.right)
+                derive(token.right),
+                token.right.deepCopy()
             )
         }
         else

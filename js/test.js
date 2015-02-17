@@ -502,7 +502,7 @@ var tests =
     testDeriveTangentWithChainRule: function()
     {
         var derivative = deriveExpression("tan(x^2)")
-        assert(derivative === "1 / cos(x^2)^2 * 2 * x", "derivation failed: tan(x^2)")
+        assert(derivative === "2 * x / cos(x^2)^2", "derivation failed: tan(x^2)")
     },
     
     testDeriveLogarithm: function()
@@ -513,8 +513,8 @@ var tests =
     
     testDeriveLogarithmWithChainRule: function()
     {
-        var derivative = deriveExpression("ln(x^2)")
-        assert(derivative === "1 / x^2 * 2 * x", "derivation failed: ln(x^2)")
+        var derivative = deriveExpression("ln(sin(x))")
+        assert(derivative === "cos(x) / sin(x)", "derivation failed: ln(sin(x))")
     }
 }
 
