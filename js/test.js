@@ -673,10 +673,22 @@ var tests =
         assert(derivative === "1 / (1 + x^2)", "derivation failed: atan(x)")
     },
     
-    testDeriveArctangenWithChainRule: function()
+    testDeriveArctangentWithChainRule: function()
     {
         var derivative = deriveExpression("atan(sin(x))")
         assert(derivative === "cos(x) / (1 + sin(x)^2)", "derivation failed: atan(sin(x))")
+    },
+    
+    testDeriveSquareRoot: function()
+    {
+        var derivative = deriveExpression("sqrt(x)")
+        assert(derivative === "1 / (2 * sqrt(x))", "derivation failed: sqrt(x)")
+    },
+    
+    testDeriveSquareRootWithChainRule: function()
+    {
+        var derivative = deriveExpression("sqrt(sin(x))")
+        assert(derivative === "cos(x) / (2 * sqrt(sin(x)))", "derivation failed: sqrt(sin(x))")
     },
     
     testDeriveLogarithm: function()
