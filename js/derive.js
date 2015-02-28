@@ -731,6 +731,87 @@ var derive = function(token)
                 )
             )
         }
+        // asin
+        else if (token.left.value === "asin")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                derive(token.right),
+                new Token
+                (
+                    "(",
+                    undefined,
+                    new Token("identifier", "sqrt"),
+                    new Token
+                    (
+                        "-",
+                        undefined,
+                        new Token("number", 1),
+                        new Token
+                        (
+                            "^",
+                            undefined,
+                            token.right.deepCopy(),
+                            new Token("number", 2)
+                        )
+                    )
+                )
+            )
+        }
+        // acos
+        else if (token.left.value === "acos")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                new Token("~", undefined, undefined, derive(token.right)),
+                new Token
+                (
+                    "(",
+                    undefined,
+                    new Token("identifier", "sqrt"),
+                    new Token
+                    (
+                        "-",
+                        undefined,
+                        new Token("number", 1),
+                        new Token
+                        (
+                            "^",
+                            undefined,
+                            token.right.deepCopy(),
+                            new Token("number", 2)
+                        )
+                    )
+                )
+            )
+        }
+        // atan
+        else if (token.left.value === "atan")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                derive(token.right),
+                new Token
+                (
+                    "+",
+                    undefined,
+                    new Token("number", 1),
+                    new Token
+                    (
+                        "^",
+                        undefined,
+                        token.right.deepCopy(),
+                        new Token("number", 2)
+                    )
+                )
+            )
+        }
         // square root
         else if (token.left.value === "sqrt")
         {
