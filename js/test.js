@@ -643,6 +643,42 @@ var tests =
         assert(derivative === "2 * x / cos(x^2)^2", "derivation failed: tan(x^2)")
     },
     
+    testDeriveArcsine: function()
+    {
+        var derivative = deriveExpression("asin(x)")
+        assert(derivative === "1 / sqrt(1 - x^2)", "derivation failed: asin(x)")
+    },
+    
+    testDeriveArcsineWithChainRule: function()
+    {
+        var derivative = deriveExpression("asin(sin(x))")
+        assert(derivative === "cos(x) / sqrt(1 - sin(x)^2)", "derivation failed: asin(sin(x))")
+    },
+    
+    testDeriveArccosine: function()
+    {
+        var derivative = deriveExpression("acos(x)")
+        assert(derivative === "-1 / sqrt(1 - x^2)", "derivation failed: acos(x)")
+    },
+    
+    testDeriveArccosineWithChainRule: function()
+    {
+        var derivative = deriveExpression("acos(sin(x))")
+        assert(derivative === "-cos(x) / sqrt(1 - sin(x)^2)", "derivation failed: acos(sin(x))")
+    },
+    
+    testDeriveArctangent: function()
+    {
+        var derivative = deriveExpression("atan(x)")
+        assert(derivative === "1 / (1 + x^2)", "derivation failed: atan(x)")
+    },
+    
+    testDeriveArctangenWithChainRule: function()
+    {
+        var derivative = deriveExpression("atan(sin(x))")
+        assert(derivative === "cos(x) / (1 + sin(x)^2)", "derivation failed: atan(sin(x))")
+    },
+    
     testDeriveLogarithm: function()
     {
         var derivative = deriveExpression("ln(x)")
