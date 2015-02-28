@@ -203,6 +203,20 @@ var tests =
         assert(expression === "-a + b - c * d / e^f(g)", "unparsing failed: -a + b - c * d / e^f(g)")
     },
     
+    testUnparseFractionsOfProducts: function()
+    {
+        var token = parse("a * b / (c * d)")
+        expression = unparse(token)
+        assert(expression === "a * b / (c * d)", "unparsing failed: a * b / (c * d)")
+    },
+    
+    testUnparseDifferencesOfSums: function()
+    {
+        var token = parse("a + b - (c + d)")
+        expression = unparse(token)
+        assert(expression === "a + b - (c + d)", "unparsing failed: a + b - (c + d)")
+    },
+    
     testUnparseParens: function()
     {
         var token = parse("(a + b) * (c + d)")
