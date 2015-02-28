@@ -679,6 +679,42 @@ var tests =
         assert(derivative === "cos(x) / (1 + sin(x)^2)", "derivation failed: atan(sin(x))")
     },
     
+    testDeriveHyperbolicSine: function()
+    {
+        var derivative = deriveExpression("sinh(x)")
+        assert(derivative === "cosh(x)", "derivation failed: sinh(x)")
+    },
+    
+    testDeriveHyperbolicSineWithChainRule: function()
+    {
+        var derivative = deriveExpression("sinh(x^2)")
+        assert(derivative === "cosh(x^2) * 2 * x", "derivation failed: sinh(x^2)")
+    },
+    
+    testDeriveHyperbolicCosine: function()
+    {
+        var derivative = deriveExpression("cosh(x)")
+        assert(derivative === "sinh(x)", "derivation failed: cosh(x)")
+    },
+    
+    testDeriveHyperbolicCosineWithChainRule: function()
+    {
+        var derivative = deriveExpression("cosh(x^2)")
+        assert(derivative === "sinh(x^2) * 2 * x", "derivation failed: cosh(x^2)")
+    },
+    
+    testDeriveHyperbolicTangent: function()
+    {
+        var derivative = deriveExpression("tanh(x)")
+        assert(derivative === "1 / cosh(x)^2", "derivation failed: tanh(x)")
+    },
+    
+    testDeriveHyperbolicTangentWithChainRule: function()
+    {
+        var derivative = deriveExpression("tanh(x^2)")
+        assert(derivative === "2 * x / cosh(x^2)^2", "derivation failed: tanh(x^2)")
+    },
+    
     testDeriveSquareRoot: function()
     {
         var derivative = deriveExpression("sqrt(x)")

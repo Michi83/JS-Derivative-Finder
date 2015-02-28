@@ -7,7 +7,7 @@ A simple JavaScript program to find derivatives of functions. Easily embeddable 
 1. Copy derive.js to your server and include it in your HTML with a script tag.
 2. Call deriveExpression on an expression string. Example: deriveExpression("x^2") will return "2 * x"
 
-At the moment the following operators and functions are supported: +, -, *, /, ^, sin, cos, tan, ln
+At the moment the following operators and functions are supported: +, -, *, /, ^, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, sqrt, ln
 
 ## Demo
 

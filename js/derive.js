@@ -812,6 +812,63 @@ var derive = function(token)
                 )
             )
         }
+        // sinh
+        else if (token.left.value === "sinh")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "(",
+                    undefined,
+                    new Token("identifier", "cosh"),
+                    token.right.deepCopy()
+                ),
+                derive(token.right)
+            )
+        }
+        // cosh
+        else if (token.left.value === "cosh")
+        {
+            return new Token
+            (
+                "*",
+                undefined,
+                new Token
+                (
+                    "(",
+                    undefined,
+                    new Token("identifier", "sinh"),
+                    token.right.deepCopy()
+                ),
+                derive(token.right)
+            )
+        }
+        // tanh
+        else if (token.left.value === "tanh")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                derive(token.right),
+                new Token
+                (
+                    "^",
+                    undefined,
+                    new Token
+                    (
+                        "(",
+                        undefined,
+                        new Token("identifier", "cosh"),
+                        token.right.deepCopy()
+                    ),
+                    new Token("number", 2)
+                )
+            )
+        }
         // square root
         else if (token.left.value === "sqrt")
         {
