@@ -340,6 +340,10 @@ var unparse = function(token)
     {
         var left = unparse(token.left)
         var right = unparse(token.right)
+        if (precedence[token.right.type] < 1)
+        {
+            right = "(" + right + ")"
+        }
         return left + " - " + right
     }
     // /
@@ -351,7 +355,7 @@ var unparse = function(token)
         {
             left = "(" + left + ")"
         }
-        if (precedence[token.right.type] < 1)
+        if (precedence[token.right.type] < 2)
         {
             right = "(" + right + ")"
         }
@@ -724,6 +728,104 @@ var derive = function(token)
                     undefined,
                     new Token("(", undefined, new Token("identifier", "cos"), token.right.deepCopy()),
                     new Token("number", 2)
+                )
+            )
+        }
+        // asin
+        else if (token.left.value === "asin")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                derive(token.right),
+                new Token
+                (
+                    "(",
+                    undefined,
+                    new Token("identifier", "sqrt"),
+                    new Token
+                    (
+                        "-",
+                        undefined,
+                        new Token("number", 1),
+                        new Token
+                        (
+                            "^",
+                            undefined,
+                            token.right.deepCopy(),
+                            new Token("number", 2)
+                        )
+                    )
+                )
+            )
+        }
+        // acos
+        else if (token.left.value === "acos")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                new Token("~", undefined, undefined, derive(token.right)),
+                new Token
+                (
+                    "(",
+                    undefined,
+                    new Token("identifier", "sqrt"),
+                    new Token
+                    (
+                        "-",
+                        undefined,
+                        new Token("number", 1),
+                        new Token
+                        (
+                            "^",
+                            undefined,
+                            token.right.deepCopy(),
+                            new Token("number", 2)
+                        )
+                    )
+                )
+            )
+        }
+        // atan
+        else if (token.left.value === "atan")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                derive(token.right),
+                new Token
+                (
+                    "+",
+                    undefined,
+                    new Token("number", 1),
+                    new Token
+                    (
+                        "^",
+                        undefined,
+                        token.right.deepCopy(),
+                        new Token("number", 2)
+                    )
+                )
+            )
+        }
+        // square root
+        else if (token.left.value === "sqrt")
+        {
+            return new Token
+            (
+                "/",
+                undefined,
+                derive(token.right),
+                new Token
+                (
+                    "*",
+                    undefined,
+                    new Token("number", 2),
+                    token.deepCopy()
                 )
             )
         }
