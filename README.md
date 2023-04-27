@@ -1,14 +1,21 @@
 # JS Derivative Finder
 
-A simple JavaScript program to find derivatives of functions. Easily embeddable in websites as it does not depend on any JavaScript libraries or server-side code. However, it's not a full-fledged computer algebra system and probably never will be.
+Algebraically finds derivatives, e.g.
 
-## Usage
+```javascript
+derive("x^2") // returns "2 * x"
+```
 
-1. Copy derive.js to your server and include it in your HTML with a script tag.
-2. Call deriveExpression on an expression string. Example: deriveExpression("x^2") will return "2 * x"
+Does not depend on any library, just a single file of vanilla JavaScript.
 
-At the moment the following operators and functions are supported: +, -, *, /, ^, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, sqrt, ln
+Supported operators: +, -, *, /, ^.
 
-## Demo
+Supported functions:
+abs, exp, ln, sign, sqrt,
+sin, cos, tan, cot, sec, csc,
+asin, acos, atan, acot, asec, acsc,
+sinh, cosh, tanh, coth, sech, csch,
+asinh, acosh, atanh, acoth, asech, acsch.
 
-A demo can be found here: [michi83.github.io/JS-Derivative-Finder/](http://michi83.github.io/JS-Derivative-Finder/)
+A demo can be found here:
+[michi83.github.io/JS-Derivative-Finder/](http://michi83.github.io/JS-Derivative-Finder/)
