@@ -100,7 +100,7 @@ let parse = (expression) => {
     // sum     ::= product {("+" | "-") product}
     // product ::= sign {("*" | "/") product}
     // sign    ::= ("+" | "-") sign | power
-    // power   ::= factor ["^" power]
+    // power   ::= factor ["^" sign]
     // factor  ::= number | name ["(" sum ")"] | "(" sum ")"
     let sum = () => {
         let token = product()
@@ -146,7 +146,7 @@ let parse = (expression) => {
         if (tokens[0].type == "^") {
             tokens[0].left = token
             token = tokens.shift()
-            token.right = power()
+            token.right = sign()
         }
         return token
     }
@@ -464,15 +464,17 @@ let simplify = (token) => {
     switch (token.type) {
     case "(":
         if (left == "abs" && token.right.type == "number") {
-            return parse(`${Math.abs(token.right.value)}`)
+            let value = Math.abs(token.right.value)
+            return new Token("number", value)
         } else if (left == "sign" && token.right.type == "number") {
-            return parse(`${Math.sign(token.right.value)}`)
+            let value = Math.sign(token.right.value)
+            return new Token("number", value)
         }
         break
     case "*":
         if (token.left.type == "number" && token.right.type == "number") {
             let value = token.left.value * token.right.value
-            return parse(`${value}`)
+            return new Token("number", value)
         }
         if (left == "0") {
             return token.left
@@ -491,7 +493,7 @@ let simplify = (token) => {
     case "+":
         if (token.left.type == "number" && token.right.type == "number") {
             let value = token.left.value + token.right.value
-            return parse(`${value}`)
+            return new Token("number", value)
         }
         if (left == "0") {
             return token.right
@@ -502,7 +504,7 @@ let simplify = (token) => {
     case "-":
         if (token.left.type == "number" && token.right.type == "number") {
             let value = token.left.value - token.right.value
-            return parse(`${value}`)
+            return new Token("number", value)
         }
         if (left == "0") {
             return parse(`-${right}`)
@@ -523,7 +525,7 @@ let simplify = (token) => {
         if (token.left.type == "number" && token.right.type == "number"
                 && token.right.value >= 0) {
             let value = Math.pow(token.left.value, token.right.value)
-            return parse(`${value}`)
+            return new Token("number", value)
         }
         if (left == "0") {
             return token.left
@@ -538,7 +540,7 @@ let simplify = (token) => {
     case "~":
         if (token.right.type == "number") {
             let value = -token.right.value
-            return parse(`${value}`)
+            return new Token("number", value)
         }
         if (left == "0") {
             return token.left
