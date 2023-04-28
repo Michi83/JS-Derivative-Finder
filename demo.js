@@ -8,7 +8,7 @@ deriveButton.addEventListener(
         try {
             let expression = deriveInput.value
             let derivative = derive(expression)
-            deriveOutput.textContent = derivative
+            deriveOutput.textContent = `f'(x) = ${derivative}`
             wipeCanvas()
             plot(expression, "#0000FF")
             plot(derivative, "#FF0000")
@@ -54,12 +54,6 @@ let wipeCanvas = () => {
     context.strokeStyle = "#000000"
     drawLine(-5, 0, 5, 0)
     drawLine(0, 5, 0, -5)
-    context.font = "16px Carlito, Calibri, sans-serif"
-    context.textBaseline = "top"
-    context.fillStyle = "#0000FF"
-    context.fillText("f(x)", 4, 4)
-    context.fillStyle = "#FF0000"
-    context.fillText("f'(x)", 4, 28)
     canvas.style.display = "revert"
 }
 
