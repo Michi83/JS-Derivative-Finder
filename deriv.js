@@ -481,13 +481,13 @@ let simplify = (token) => {
         } else if (left == "1") {
             return token.right
         } else if (left == "-1") {
-            return parse(`-${right}`)
+            return parse(`-(${right})`)
         } else if (right == "0") {
             return token.right
         } else if (right == "1") {
             return token.left
         } else if (right == "-1") {
-            return parse(`-${left}`)
+            return parse(`-(${left})`)
         }
         break
     case "+":
@@ -507,7 +507,7 @@ let simplify = (token) => {
             return new Token("number", value)
         }
         if (left == "0") {
-            return parse(`-${right}`)
+            return parse(`-(${right})`)
         } else if (right == "0") {
             return token.left
         }
@@ -518,7 +518,7 @@ let simplify = (token) => {
         } else if (right == "1") {
             return token.left
         } else if (right == "-1") {
-            return parse(`-${left}`)
+            return parse(`-(${left})`)
         }
         break
     case "^":
@@ -541,15 +541,6 @@ let simplify = (token) => {
         if (token.right.type == "number") {
             let value = -token.right.value
             return new Token("number", value)
-        }
-        if (left == "0") {
-            return token.left
-        } else if (left == "1") {
-            return token.left
-        } else if (right == "0") {
-            return parse("1")
-        } else if (right == "1") {
-            return token.left
         }
         break
     }
