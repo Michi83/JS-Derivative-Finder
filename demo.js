@@ -44,7 +44,8 @@ let drawLine = (x1, y1, x2, y2) => {
 }
 
 let wipeCanvas = () => {
-    context.clearRect(0, 0, canvas.width, canvas.height)
+    context.fillStyle = "#FFFFFF"
+    context.fillRect(0, 0, canvas.width, canvas.height)
     context.lineWidth = 1
     context.strokeStyle = "#C0C0C0"
     for (let i = -5; i <= 5; i++) {
