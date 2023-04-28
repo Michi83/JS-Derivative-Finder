@@ -559,3 +559,117 @@ let derive = (expression) => {
     root = simplify(root)
     return unparse(root)
 }
+
+// With all this work done, writing code to evaluate an expression for a given x
+// becomes easy, so why not?
+let evaluateToken = (token, x) => {
+    let left
+    let right
+    if (token.left != undefined) {
+        left = evaluateToken(token.left, x)
+    }
+    if (token.right != undefined) {
+        right = evaluateToken(token.right, x)
+    }
+    switch (token.type) {
+    case "(":
+        switch (token.left.value) {
+        case "abs":
+            return Math.abs(right)
+        case "exp":
+            return Math.exp(right)
+        case "ln":
+            return Math.log(right)
+        case "sign":
+            return Math.sign(right)
+        case "sqrt":
+            return Math.sqrt(right)
+        case "sin":
+            return Math.sin(right)
+        case "cos":
+            return Math.cos(right)
+        case "tan":
+            return Math.tan(right)
+        case "cot":
+            return 1 / Math.tan(right)
+        case "sec":
+            return 1 / Math.cos(right)
+        case "csc":
+            return 1 / Math.sin(right)
+        case "asin":
+            return Math.asin(right)
+        case "acos":
+            return Math.acos(right)
+        case "atan":
+            return Math.atan(right)
+        case "acot":
+            if (right >= 0) {
+                return Math.atan(1 / right)
+            } else {
+                return Math.atan(1 / right) + Math.PI
+            }
+        case "asec":
+            return Math.acos(1 / right)
+        case "acsc":
+            return Math.asin(1 / right)
+        case "sinh":
+            return Math.sinh(right)
+        case "cosh":
+            return Math.cosh(right)
+        case "tanh":
+            return Math.tanh(right)
+        case "coth":
+            return 1 / Math.tanh(right)
+        case "sech":
+            return 1 / Math.cosh(right)
+        case "csch":
+            return 1 / Math.sinh(right)
+        case "asinh":
+            return Math.asinh(right)
+        case "acosh":
+            return Math.acosh(right)
+        case "atanh":
+            return Math.atanh(right)
+        case "acoth":
+            return Math.atanh(1 / right)
+        case "asech":
+            return Math.acosh(1 / right)
+        case "acsch":
+            return Math.asinh(1 / right)
+        default:
+            return NaN
+        }
+    case "*":
+        return left * right
+    case "+":
+        return left + right
+    case "-":
+        return left - right
+    case "/":
+        return left / right
+    case "number":
+        return token.value
+    case "name":
+        switch (token.value) {
+        case "e":
+            return Math.E
+        case "pi":
+            return Math.PI
+        case "x":
+            return x
+        default:
+            return NaN
+        }
+    case "^":
+        return Math.pow(left, right)
+    case "~":
+        return -right
+    default:
+        throw `unexpected token ${token.type}`
+    }
+}
+
+let evaluate = (expression, x) => {
+    let root = parse(expression)
+    return evaluateToken(root, x)
+}
