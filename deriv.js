@@ -615,11 +615,7 @@ let evaluateToken = (token, x) => {
         case "atan":
             return Math.atan(right)
         case "acot":
-            if (right >= 0) {
-                return Math.atan(1 / right)
-            } else {
-                return Math.atan(1 / right) + Math.PI
-            }
+            return (Math.atan(1 / right) + Math.PI) % Math.PI
         case "asec":
             return Math.acos(1 / right)
         case "acsc":
