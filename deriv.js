@@ -316,22 +316,22 @@ let deriveToken = (token) => {
             deriv = `-csc(${right}) * cot(${right}) * ${dright}`
             break
         case "asin":
-            deriv = `${dright} / sqrt(1 - ${right}^2)`
+            deriv = `sec(asin(${right})) * ${dright}`
             break
         case "acos":
-            deriv = `-${dright} / sqrt(1 - ${right}^2)`
+            deriv = `-csc(acos(${right})) * ${dright}`
             break
         case "atan":
-            deriv = `${dright} / (${right}^2 + 1)`
+            deriv = `cos(atan(${right}))^2 * ${dright}`
             break
         case "acot":
-            deriv = `-${dright} / (${right}^2 + 1)`
+            deriv = `-sin(acot(${right}))^2 * ${dright}`
             break
         case "asec":
-            deriv = `${dright} / (abs(${right}) * sqrt(${right}^2 - 1))`
+            deriv = `cos(asec(${right})) * cot(asec(${right})) * ${dright}`
             break
         case "acsc":
-            deriv = `-${dright} / (abs(${right}) * sqrt(${right}^2 - 1))`
+            deriv = `-sin(acsc(${right})) * tan(acsc(${right})) * ${dright}`
             break
         case "sinh":
             deriv = `cosh(${right}) * ${dright}`
@@ -352,22 +352,22 @@ let deriveToken = (token) => {
             deriv = `-csch(${right}) * coth(${right}) * ${dright}`
             break
         case "asinh":
-            deriv = `${dright} / sqrt(${right}^2 + 1)`
+            deriv = `sech(asinh(${right})) * ${dright}`
             break
         case "acosh":
-            deriv = `${dright} / sqrt(${right}^2 - 1)`
+            deriv = `csch(acosh(${right})) * ${dright}`
             break
         case "atanh":
-            deriv = `${dright} / (1 - ${right}^2)`
+            deriv = `cosh(atanh(${right}))^2 * ${dright}`
             break
         case "acoth":
-            deriv = `${dright} / (1 - ${right}^2)`
+            deriv = `-sinh(acoth(${right}))^2 * ${dright}`
             break
         case "asech":
-            deriv = `-${dright} / (abs(${right}) * sqrt(1 - ${right}^2))`
+            deriv = `-cosh(asech(${right})) * coth(asech(${right})) * ${dright}`
             break
         case "acsch":
-            deriv = `-${dright} / (abs(${right}) * sqrt(${right}^2 + 1))`
+            deriv = `-sinh(acsch(${right})) * tanh(acsch(${right})) * ${dright}`
             break
         default:
             // Unknown functions. Chain rule still applies.
