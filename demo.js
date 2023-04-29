@@ -55,7 +55,7 @@ let wipeCanvas = () => {
     context.strokeStyle = "#000000"
     drawLine(-5, 0, 5, 0)
     drawLine(0, 5, 0, -5)
-    canvas.style.display = "revert"
+    canvas.style.display = "initial"
 }
 
 let step = 1 / 16
