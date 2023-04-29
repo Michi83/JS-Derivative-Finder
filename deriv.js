@@ -288,6 +288,12 @@ let deriveToken = (token) => {
         case "ln":
             deriv = `${dright} / ${right}`
             break
+        case "log10":
+            deriv = `${dright} / (${right} * ln(10))`
+            break
+        case "log2":
+            deriv = `${dright} / (${right} * ln(2))`
+            break
         case "sqrt":
             deriv = `${dright} / (2 * sqrt(${right}))`
             break
@@ -575,6 +581,10 @@ let evaluateToken = (token, x) => {
             return Math.exp(right)
         case "ln":
             return Math.log(right)
+        case "log10":
+            return Math.log10(right)
+        case "log2":
+            return Math.log2(right)
         case "sqrt":
             return Math.sqrt(right)
         case "sin":
