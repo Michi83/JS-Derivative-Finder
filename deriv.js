@@ -420,9 +420,11 @@ let deriveToken = (token) => {
 // 2 + 3  -> 5
 // a + 0  -> a
 // 0 + a  -> a
+// a + a  -> 2 * a
 // 2 - 3  -> -1
 // a - 0  -> a
 // 0 - a  -> -a
+// a - a  -> 0
 // 2 * 3  -> 6
 // a * 0  -> 0
 // a * 1  -> a
@@ -430,9 +432,11 @@ let deriveToken = (token) => {
 // 0 * a  -> 0
 // 1 * a  -> a
 // -1 * a -> -a
+// a * a  -> a^2
 // a / 1  -> a
 // a / -1 -> -a
 // 0 / a  -> 0
+// a / a  -> 1
 // 2^3    -> 8
 // a^0    -> 1
 // a^1    -> a
@@ -488,6 +492,8 @@ let simplify = (token) => {
             return token.left
         } else if (right == "-1") {
             return parse(`-(${left})`)
+        } else if (left == right) {
+            return parse(`(${left})^2`)
         }
         break
     case "+":
@@ -499,6 +505,8 @@ let simplify = (token) => {
             return token.right
         } else if (right == "0") {
             return token.left
+        } else if (left == right) {
+            return parse(`2 * (${left})`)
         }
         break
     case "-":
@@ -510,6 +518,8 @@ let simplify = (token) => {
             return parse(`-(${right})`)
         } else if (right == "0") {
             return token.left
+        } else if (left == right) {
+            return new Token("number", 0)
         }
         break
     case "/":
@@ -519,6 +529,8 @@ let simplify = (token) => {
             return token.left
         } else if (right == "-1") {
             return parse(`-(${left})`)
+        } else if (left == right) {
+            return new Token("number", 1)
         }
         break
     case "^":
