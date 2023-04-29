@@ -282,17 +282,11 @@ let deriveToken = (token) => {
     switch (token.type) {
     case "(":
         switch (token.left.value) {
-        case "abs":
-            deriv = `sign(${right}) * ${dright}`
-            break
         case "exp":
             deriv = `exp(${right}) * ${dright}`
             break
         case "ln":
             deriv = `${dright} / ${right}`
-            break
-        case "sign":
-            deriv = "0"
             break
         case "sqrt":
             deriv = `${dright} / (2 * sqrt(${right}))`
@@ -466,15 +460,6 @@ let simplify = (token) => {
         right = unparse(token.right)
     }
     switch (token.type) {
-    case "(":
-        if (left == "abs" && token.right.type == "number") {
-            let value = Math.abs(token.right.value)
-            return new Token("number", value)
-        } else if (left == "sign" && token.right.type == "number") {
-            let value = Math.sign(token.right.value)
-            return new Token("number", value)
-        }
-        break
     case "*":
         if (token.left.type == "number" && token.right.type == "number") {
             let value = token.left.value * token.right.value
@@ -586,14 +571,10 @@ let evaluateToken = (token, x) => {
     switch (token.type) {
     case "(":
         switch (token.left.value) {
-        case "abs":
-            return Math.abs(right)
         case "exp":
             return Math.exp(right)
         case "ln":
             return Math.log(right)
-        case "sign":
-            return Math.sign(right)
         case "sqrt":
             return Math.sqrt(right)
         case "sin":

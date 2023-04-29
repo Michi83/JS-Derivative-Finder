@@ -11,7 +11,7 @@ Does not depend on any library, just a single file of vanilla JavaScript.
 Supported operators: +, -, *, /, ^.
 
 Supported functions:  
-abs, exp, ln, sign, sqrt,  
+exp, ln, sqrt,  
 sin, cos, tan, cot, sec, csc,  
 asin, acos, atan, acot, asec, acsc,  
 sinh, cosh, tanh, coth, sech, csch,  
