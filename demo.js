@@ -9,6 +9,7 @@ deriveButton.addEventListener(
             let expression = deriveInput.value
             let derivative = derive(expression)
             deriveOutput.textContent = `f'(x) = ${derivative}`
+            canvas.style.display = "initial"
             wipeCanvas()
             plot(expression, "#0000FF")
             plot(derivative, "#FF0000")
@@ -55,7 +56,6 @@ let wipeCanvas = () => {
     context.strokeStyle = "#000000"
     drawLine(-5, 0, 5, 0)
     drawLine(0, 5, 0, -5)
-    canvas.style.display = "initial"
 }
 
 let step = 1 / 16
