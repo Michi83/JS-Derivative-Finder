@@ -498,6 +498,10 @@ let simplify = (token) => {
             return token.left
         } else if (left == right) {
             return parse(`2 * (${left})`)
+        } else if (token.right.type == "number" && token.right.value < 0) {
+            return parse(`(${left}) - (${-token.right.value})`)
+        } else if (token.right.type == "~") {
+            return parse(`(${left}) - (${unparse(token.right.right)})`)
         }
         break
     case "-":
@@ -511,6 +515,10 @@ let simplify = (token) => {
             return token.left
         } else if (left == right) {
             return new Token("number", 0)
+        } else if (token.right.type == "number" && token.right.value < 0) {
+            return parse(`(${left}) + (${-token.right.value})`)
+        } else if (token.right.type == "~") {
+            return parse(`(${left}) + (${unparse(token.right.right)})`)
         }
         break
     case "/":
@@ -544,6 +552,8 @@ let simplify = (token) => {
         if (token.right.type == "number") {
             let value = -token.right.value
             return new Token("number", value)
+        } else if (token.right.type == "~") {
+            return token.right.right
         }
         break
     }
