@@ -195,7 +195,6 @@ let parse = (expression) => {
 // same string, e.g. parsing and unparsing "(a + b) + c" will result in
 // "a + b + c".
 let unparse = (token) => {
-    let expression
     let left
     let right
     if (token.left != undefined) {
@@ -251,7 +250,6 @@ let unparse = (token) => {
         // Should never happen.
         throw `unexpected token ${token.type}`
     }
-    return expression
 }
 
 // From here on out we'll employ a little trick. We could build syntax trees in
