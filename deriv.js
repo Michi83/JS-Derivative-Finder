@@ -414,33 +414,106 @@ let deriveToken = (token) => {
     return parse(deriv)
 }
 
-// Supported simplifications:
-// 2 + 3  -> 5
-// a + 0  -> a
-// 0 + a  -> a
-// a + a  -> 2 * a
-// 2 - 3  -> -1
-// a - 0  -> a
-// 0 - a  -> -a
-// a - a  -> 0
-// 2 * 3  -> 6
-// a * 0  -> 0
-// a * 1  -> a
-// a * -1 -> -a
-// 0 * a  -> 0
-// 1 * a  -> a
-// -1 * a -> -a
-// a * a  -> a^2
-// a / 1  -> a
-// a / -1 -> -a
-// 0 / a  -> 0
-// a / a  -> 1
-// 2^3    -> 8
-// a^0    -> 1
-// a^1    -> a
-// 0^a    -> 0
-// 1^a    -> 1
-// and these:
+// Simplification mechanism
+
+let addToObject = (object, token, number) => {
+    let expression = `(${unparse(token)})`
+    if (object[expression] == undefined) {
+        object[expression] = 0
+    }
+    object[expression] += number
+}
+
+let simplifySum = (token) => {
+    let numberTerm = 0
+    let terms = {}
+
+    let collectTerms = (token, factor = 1) => {
+        switch (token.type) {
+        case "+":
+            collectTerms(token.left, factor)
+            collectTerms(token.right, factor)
+            break
+        case "-":
+            collectTerms(token.left, factor)
+            collectTerms(token.right, -factor)
+            break
+        case "*":
+            if (token.left.type == "number") {
+                collectTerms(token.right, factor * token.left.value)
+            } else {
+                addToObject(terms, token, factor)
+            }
+            break
+        case "/":
+            addToObject(terms, token, factor)
+            break
+        case "~":
+            collectTerms(new Token("number", 0), factor)
+            collectTerms(token.right, -factor)
+            break
+        case "^":
+            addToObject(terms, token, factor)
+            break
+        case "(":
+            addToObject(terms, token, factor)
+            break
+        case "name":
+            addToObject(terms, token, factor)
+            break
+        case "number":
+            numberTerm += factor * token.value
+            break
+        }
+    }
+
+    collectTerms(token)
+    let expression = ""
+
+    for (let term in terms) {
+        let factor = terms[term]
+        if (factor > 0) {
+            if (expression != "") {
+                expression += " + "
+            }
+            if (factor != 1) {
+                expression += `${factor} * `
+            }
+            expression += term
+        } else if (factor < 0) {
+            if (expression != "") {
+                expression += " - "
+            } else {
+                expression += "-"
+            }
+            if (factor != -1) {
+                expression += `${-factor} * `
+            }
+            expression += term
+        }
+    }
+
+    if (numberTerm > 0) {
+        if (expression != "") {
+            expression += ` + ${numberTerm}`
+        } else {
+            expression += `${numberTerm}`
+        }
+    } else if (numberTerm < 0) {
+        if (expression != "") {
+            expression += ` - ${-numberTerm}`
+        } else {
+            expression += `${numberTerm}`
+        }
+    } else {
+        if (expression == "") {
+            expression = "0"
+        }
+    }
+
+    return parse(expression)
+}
+
 let simplifications = {
     "exp(0)": "1",
     "exp(1)": "e",
@@ -486,39 +559,9 @@ let simplify = (token) => {
         }
         break
     case "+":
-        if (token.left.type == "number" && token.right.type == "number") {
-            let value = token.left.value + token.right.value
-            return new Token("number", value)
-        }
-        if (left == "0") {
-            return token.right
-        } else if (right == "0") {
-            return token.left
-        } else if (left == right) {
-            return parse(`2 * (${left})`)
-        } else if (token.right.type == "number" && token.right.value < 0) {
-            return parse(`(${left}) - (${-token.right.value})`)
-        } else if (token.right.type == "~") {
-            return parse(`(${left}) - (${unparse(token.right.right)})`)
-        }
-        break
     case "-":
-        if (token.left.type == "number" && token.right.type == "number") {
-            let value = token.left.value - token.right.value
-            return new Token("number", value)
-        }
-        if (left == "0") {
-            return parse(`-(${right})`)
-        } else if (right == "0") {
-            return token.left
-        } else if (left == right) {
-            return new Token("number", 0)
-        } else if (token.right.type == "number" && token.right.value < 0) {
-            return parse(`(${left}) + (${-token.right.value})`)
-        } else if (token.right.type == "~") {
-            return parse(`(${left}) + (${unparse(token.right.right)})`)
-        }
-        break
+    case "~":
+        return simplifySum(token)
     case "/":
         if (left == "0") {
             return token.left
@@ -546,7 +589,6 @@ let simplify = (token) => {
             return token.left
         }
         break
-    case "~":
         if (token.right.type == "number") {
             let value = -token.right.value
             return new Token("number", value)
