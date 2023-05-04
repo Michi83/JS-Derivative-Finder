@@ -567,9 +567,17 @@ let simplifyProduct = (token) => {
     }
 
     collectFactors(token)
+    if (numberNumerator == 0 && numberDenominator == 0) {
+        return parse("0 / 0")
+    }
     let gcd = euclid(numberNumerator, numberDenominator)
     numberNumerator /= gcd
     numberDenominator /= gcd
+    // From here on out numberDenominator will be non-negative.
+    if (numberDenominator < 0) {
+        numberNumerator = -numberNumerator
+        numberDenominator = -numberDenominator
+    }
     let expressionNumerator
     let expressionDenominator
 
