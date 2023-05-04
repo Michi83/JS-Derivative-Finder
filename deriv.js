@@ -300,7 +300,6 @@ let simplifySum = (token) => {
             addToObject(terms, token, factor)
             break
         case "~":
-            collectTerms(new Token("number", 0), factor)
             collectTerms(token.right, -factor)
             break
         case "^":
@@ -345,7 +344,7 @@ let simplifySum = (token) => {
     }
 
     if (expression == "") {
-        expression = `${numberTerm}`
+        return new Token("number", numberTerm)
     } else if (numberTerm > 0) {
         expression = `${expression} + ${numberTerm}`
     } else if (numberTerm < 0) {
