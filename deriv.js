@@ -260,159 +260,6 @@ let unparse = (token) => {
 // But that would be very tedious. Instead, we'll let the parse function do it
 // for us:
 // let root = parse("1 + 2")
-let deriveToken = (token) => {
-    let deriv
-    let left
-    let dleft
-    let right
-    let dright
-    // The parentheses are not always necessary but just in case. There will be
-    // another parse-unparse cycle where they get removed if they are
-    // unnecessary.
-    if (token.left != undefined) {
-        left = `(${unparse(token.left)})`
-        dleft = `(${unparse(deriveToken(token.left))})`
-    }
-    if (token.right != undefined) {
-        right = `(${unparse(token.right)})`
-        dright = `(${unparse(deriveToken(token.right))})`
-    }
-    switch (token.type) {
-    case "(":
-        switch (token.left.value) {
-        case "exp":
-            deriv = `exp(${right}) * ${dright}`
-            break
-        case "ln":
-            deriv = `${dright} / ${right}`
-            break
-        case "log10":
-            deriv = `${dright} / (${right} * ln(10))`
-            break
-        case "log2":
-            deriv = `${dright} / (${right} * ln(2))`
-            break
-        case "sqrt":
-            deriv = `${dright} / (2 * sqrt(${right}))`
-            break
-        case "sin":
-            deriv = `cos(${right}) * ${dright}`
-            break
-        case "cos":
-            deriv = `-sin(${right}) * ${dright}`
-            break
-        case "tan":
-            deriv = `sec(${right})^2 * ${dright}`
-            break
-        case "cot":
-            deriv = `-csc(${right})^2 * ${dright}`
-            break
-        case "sec":
-            deriv = `sec(${right}) * tan(${right}) * ${dright}`
-            break
-        case "csc":
-            deriv = `-csc(${right}) * cot(${right}) * ${dright}`
-            break
-        case "asin":
-            deriv = `sec(asin(${right})) * ${dright}`
-            break
-        case "acos":
-            deriv = `-csc(acos(${right})) * ${dright}`
-            break
-        case "atan":
-            deriv = `cos(atan(${right}))^2 * ${dright}`
-            break
-        case "acot":
-            deriv = `-sin(acot(${right}))^2 * ${dright}`
-            break
-        case "asec":
-            deriv = `cos(asec(${right})) * cot(asec(${right})) * ${dright}`
-            break
-        case "acsc":
-            deriv = `-sin(acsc(${right})) * tan(acsc(${right})) * ${dright}`
-            break
-        case "sinh":
-            deriv = `cosh(${right}) * ${dright}`
-            break
-        case "cosh":
-            deriv = `sinh(${right}) * ${dright}`
-            break
-        case "tanh":
-            deriv = `sech(${right})^2 * ${dright}`
-            break
-        case "coth":
-            deriv = `-csch(${right})^2 * ${dright}`
-            break
-        case "sech":
-            deriv = `-sech(${right}) * tanh(${right}) * ${dright}`
-            break
-        case "csch":
-            deriv = `-csch(${right}) * coth(${right}) * ${dright}`
-            break
-        case "asinh":
-            deriv = `sech(asinh(${right})) * ${dright}`
-            break
-        case "acosh":
-            deriv = `csch(acosh(${right})) * ${dright}`
-            break
-        case "atanh":
-            deriv = `cosh(atanh(${right}))^2 * ${dright}`
-            break
-        case "acoth":
-            deriv = `-sinh(acoth(${right}))^2 * ${dright}`
-            break
-        case "asech":
-            deriv = `-cosh(asech(${right})) * coth(asech(${right})) * ${dright}`
-            break
-        case "acsch":
-            deriv = `-sinh(acsch(${right})) * tanh(acsch(${right})) * ${dright}`
-            break
-        default:
-            // Unknown functions. Chain rule still applies.
-            deriv = `${token.left.value}'(${right}) * ${dright}`
-        }
-        break
-    case "*":
-        deriv = `${dleft} * ${right} + ${left} * ${dright}`
-        break
-    case "+":
-        deriv = `${dleft} + ${dright}`
-        break
-    case "-":
-        deriv = `${dleft} - ${dright}`
-        break
-    case "/":
-        deriv = `(${dleft} * ${right} - ${left} * ${dright}) / ${right}^2`
-        break
-    case "number":
-        deriv = "0"
-        break
-    case "name":
-        deriv = token.value == "x" ? "1" : "0"
-        break
-    case "^":
-        if (token.left.isConstant()) {
-            deriv = `${left}^${right} * ln(${left}) * ${dright}`
-        } else if (token.right.isConstant()) {
-            deriv = `${right} * ${left}^(${right} - 1) * ${dleft}`
-        } else {
-            // We could use this formula for all powers but we get simpler
-            // results if we use special formulas for powers containing
-            // constants.
-            deriv = `${left}^${right}`
-            deriv += ` * (${dleft} * ${right} / ${left}`
-            deriv += ` + ${dright} * ln(${left}))`
-        }
-        break
-    case "~":
-        deriv = `-${dright}`
-        break
-    default:
-        // Should never happen.
-        throw `unexpected token ${token.type}`
-    }
-    return parse(deriv)
-}
 
 // Simplification mechanism
 
@@ -424,8 +271,8 @@ let addToObject = (object, token, number) => {
     object[expression] += number
 }
 
-// A sum may be a complicated tree of +, -, and ~, so out strategy will be:
-// - Make an inventory of individual terms,
+// A sum may be a complicated tree of +, -, and ~, so our strategy will be:
+// - Make an inventory of the individual terms,
 // - Assemble the pieces.
 // We'll employ a similar strategy for products.
 let simplifySum = (token) => {
@@ -695,6 +542,158 @@ let simplify = (token) => {
         // Return the token unchanged if we find no simplification.
         return token
     }
+}
+
+let deriveToken = (token) => {
+    let deriv
+    let left
+    let dleft
+    let right
+    let dright
+    // The parentheses are not always necessary but just in case. There will be
+    // another parse-unparse cycle where they get removed if they are
+    // unnecessary.
+    if (token.left != undefined) {
+        left = `(${unparse(token.left)})`
+        dleft = `(${unparse(deriveToken(token.left))})`
+    }
+    if (token.right != undefined) {
+        right = `(${unparse(token.right)})`
+        dright = `(${unparse(deriveToken(token.right))})`
+    }
+    switch (token.type) {
+    case "(":
+        switch (token.left.value) {
+        case "exp":
+            deriv = `exp(${right}) * ${dright}`
+            break
+        case "ln":
+            deriv = `${dright} / ${right}`
+            break
+        case "log10":
+            deriv = `${dright} / (${right} * ln(10))`
+            break
+        case "log2":
+            deriv = `${dright} / (${right} * ln(2))`
+            break
+        case "sqrt":
+            deriv = `${dright} / (2 * sqrt(${right}))`
+            break
+        case "sin":
+            deriv = `cos(${right}) * ${dright}`
+            break
+        case "cos":
+            deriv = `-sin(${right}) * ${dright}`
+            break
+        case "tan":
+            deriv = `sec(${right})^2 * ${dright}`
+            break
+        case "cot":
+            deriv = `-csc(${right})^2 * ${dright}`
+            break
+        case "sec":
+            deriv = `sec(${right}) * tan(${right}) * ${dright}`
+            break
+        case "csc":
+            deriv = `-csc(${right}) * cot(${right}) * ${dright}`
+            break
+        case "asin":
+            deriv = `sec(asin(${right})) * ${dright}`
+            break
+        case "acos":
+            deriv = `-csc(acos(${right})) * ${dright}`
+            break
+        case "atan":
+            deriv = `cos(atan(${right}))^2 * ${dright}`
+            break
+        case "acot":
+            deriv = `-sin(acot(${right}))^2 * ${dright}`
+            break
+        case "asec":
+            deriv = `cos(asec(${right})) * cot(asec(${right})) * ${dright}`
+            break
+        case "acsc":
+            deriv = `-sin(acsc(${right})) * tan(acsc(${right})) * ${dright}`
+            break
+        case "sinh":
+            deriv = `cosh(${right}) * ${dright}`
+            break
+        case "cosh":
+            deriv = `sinh(${right}) * ${dright}`
+            break
+        case "tanh":
+            deriv = `sech(${right})^2 * ${dright}`
+            break
+        case "coth":
+            deriv = `-csch(${right})^2 * ${dright}`
+            break
+        case "sech":
+            deriv = `-sech(${right}) * tanh(${right}) * ${dright}`
+            break
+        case "csch":
+            deriv = `-csch(${right}) * coth(${right}) * ${dright}`
+            break
+        case "asinh":
+            deriv = `sech(asinh(${right})) * ${dright}`
+            break
+        case "acosh":
+            deriv = `csch(acosh(${right})) * ${dright}`
+            break
+        case "atanh":
+            deriv = `cosh(atanh(${right}))^2 * ${dright}`
+            break
+        case "acoth":
+            deriv = `-sinh(acoth(${right}))^2 * ${dright}`
+            break
+        case "asech":
+            deriv = `-cosh(asech(${right})) * coth(asech(${right})) * ${dright}`
+            break
+        case "acsch":
+            deriv = `-sinh(acsch(${right})) * tanh(acsch(${right})) * ${dright}`
+            break
+        default:
+            // Unknown functions. Chain rule still applies.
+            deriv = `${token.left.value}'(${right}) * ${dright}`
+        }
+        break
+    case "*":
+        deriv = `${dleft} * ${right} + ${left} * ${dright}`
+        break
+    case "+":
+        deriv = `${dleft} + ${dright}`
+        break
+    case "-":
+        deriv = `${dleft} - ${dright}`
+        break
+    case "/":
+        deriv = `(${dleft} * ${right} - ${left} * ${dright}) / ${right}^2`
+        break
+    case "number":
+        deriv = "0"
+        break
+    case "name":
+        deriv = token.value == "x" ? "1" : "0"
+        break
+    case "^":
+        if (token.right.isConstant()) {
+            deriv = `${right} * ${left}^(${right} - 1) * ${dleft}`
+        } else {
+            // We could use this formula for all powers but we get simpler
+            // results if we use a special formula for powers with a constant
+            // exponent.
+            deriv = `${left}^${right}`
+            deriv += ` * (${dleft} * ${right} / ${left}`
+            deriv += ` + ${dright} * ln(${left}))`
+        }
+        break
+    case "~":
+        deriv = `-${dright}`
+        break
+    default:
+        // Should never happen.
+        throw `unexpected token ${token.type}`
+    }
+    return parse(deriv)
 }
 
 let derive = (expression) => {
