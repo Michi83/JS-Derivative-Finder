@@ -514,6 +514,127 @@ let simplifySum = (token) => {
     return parse(expression)
 }
 
+let simplifyProduct = (token) => {
+    let numberNumerator = 1
+    let numberDenominator = 1
+    let factors = {}
+
+    let collectFactors = (token, exponent = 1) => {
+        switch (token.type) {
+        case "+":
+        case "-":
+            addToObject(factors, token, exponent)
+            break
+        case "*":
+            collectFactors(token.left, exponent)
+            collectFactors(token.right, exponent)
+            break
+        case "/":
+            collectFactors(token.left, exponent)
+            collectFactors(token.right, -exponent)
+            break
+        case "~":
+            collectFactors(new Token("number", -1), exponent)
+            collectFactors(token.right, exponent)
+            break
+        case "^":
+            if (token.right.type == "number") {
+                collectFactors(token.left, exponent * token.right.value)
+            } else {
+                addToObject(factors, token, exponent)
+            }
+            break
+        case "(":
+        case "name":
+            addToObject(factors, token, exponent)
+            break
+        case "number":
+            if (exponent >= 0) {
+                numberNumerator *= Math.pow(token.value, exponent)
+            } else {
+                numberDenominator *= Math.pow(token.value, -exponent)
+            }
+            break
+        }
+    }
+
+    let euclid = (a, b) => {
+        if (b == 0) {
+            return a
+        } else {
+            return euclid(b, a % b)
+        }
+    }
+
+    collectFactors(token)
+    let gcd = euclid(numberNumerator, numberDenominator)
+    numberNumerator /= gcd
+    numberDenominator /= gcd
+    let expressionNumerator
+    let expressionDenominator
+
+    if (numberNumerator == 0) {
+        return new Token("number", 0)
+    } else if (numberNumerator == 1) {
+        expressionNumerator = ""
+    } else if (numberNumerator == -1) {
+        expressionNumerator = "-"
+    } else {
+        expressionNumerator = `${numberNumerator}`
+    }
+
+    if (numberDenominator == 0) {
+        return parse("0 / 0")
+    } else if (numberDenominator == 1) {
+        expressionDenominator = ""
+    } else if (numberDenominator == -1) {
+        expressionDenominator = "-"
+    } else {
+        expressionDenominator = `${numberDenominator}`
+    }
+
+    for (let factor in factors) {
+        let exponent = factors[factor]
+        if (exponent > 0) {
+            if (expressionNumerator != "" && expressionNumerator != "-") {
+                expressionNumerator += " * "
+            }
+            expressionNumerator += `${factor}`
+            if (exponent != 1) {
+                expressionNumerator += `^${exponent}`
+            }
+        } else if (exponent < 0) {
+            if (expressionDenominator != "" && expressionDenominator != "-") {
+                expressionDenominator += " * "
+            }
+            expressionDenominator += `${factor}`
+            if (exponent != -1) {
+                expressionDenominator += `^${-exponent}`
+            }
+        }
+    }
+
+    if (expressionNumerator == "") {
+        expressionNumerator = "1"
+    } else if (expressionNumerator == "-") {
+        expressionNumerator = "-1"
+    }
+
+    if (expressionDenominator == "") {
+        expressionDenominator = "1"
+    }
+
+    if (expressionNumerator == "1" && expressionDenominator == "1") {
+        return new Token("number", 1)
+    } else if (expressionNumerator == "-1" && expressionDenominator == "1") {
+        return new Token("number", -1)
+    } else if (expressionDenominator == "1") {
+        return parse(expressionNumerator)
+    } else {
+        return parse(`${expressionNumerator} / (${expressionDenominator})`)
+    }
+}
+
 let simplifications = {
     "exp(0)": "1",
     "exp(1)": "e",
@@ -537,42 +658,13 @@ let simplify = (token) => {
         right = unparse(token.right)
     }
     switch (token.type) {
-    case "*":
-        if (token.left.type == "number" && token.right.type == "number") {
-            let value = token.left.value * token.right.value
-            return new Token("number", value)
-        }
-        if (left == "0") {
-            return token.left
-        } else if (left == "1") {
-            return token.right
-        } else if (left == "-1") {
-            return parse(`-(${right})`)
-        } else if (right == "0") {
-            return token.right
-        } else if (right == "1") {
-            return token.left
-        } else if (right == "-1") {
-            return parse(`-(${left})`)
-        } else if (left == right) {
-            return parse(`(${left})^2`)
-        }
-        break
     case "+":
     case "-":
     case "~":
         return simplifySum(token)
+    case "*":
     case "/":
-        if (left == "0") {
-            return token.left
-        } else if (right == "1") {
-            return token.left
-        } else if (right == "-1") {
-            return parse(`-(${left})`)
-        } else if (left == right) {
-            return new Token("number", 1)
-        }
-        break
+        return simplifyProduct(token)
     case "^":
         if (token.left.type == "number" && token.right.type == "number"
                 && token.right.value >= 0) {
