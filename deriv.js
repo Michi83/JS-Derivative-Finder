@@ -514,6 +514,14 @@ let simplifySum = (token) => {
     return parse(expression)
 }
 
+let euclid = (a, b) => {
+    if (b == 0) {
+        return a
+    } else {
+        return euclid(b, a % b)
+    }
+}
+
 let simplifyProduct = (token) => {
     let numberNumerator = 1
     let numberDenominator = 1
@@ -555,14 +563,6 @@ let simplifyProduct = (token) => {
                 numberDenominator *= Math.pow(token.value, -exponent)
             }
             break
-        }
-    }
-
-    let euclid = (a, b) => {
-        if (b == 0) {
-            return a
-        } else {
-            return euclid(b, a % b)
         }
     }
 
@@ -658,27 +658,36 @@ let simplifyPower = (token) => {
     return token
 }
 
-let simplifications = {
+let functionSimplifications = {
     "exp(0)": "1",
     "exp(1)": "e",
     "ln(1)": "0",
     "ln(e)": "1",
+    "log10(1)": "0",
+    "log10(10)": "1",
+    "log2(1)": "0",
+    "log2(2)": "1",
     "sqrt(0)": "0",
     "sqrt(1)": "1"
+}
+
+let simplifyFunction = (token) => {
+    let simplification = functionSimplifications[unparse(token)]
+    if (simplification != undefined) {
+        return parse(simplification)
+    } else {
+        return token
+    }
 }
 
 // Don't expect this function to always find the simplest form. Only a few
 // common sense simplifications are applied.
 let simplify = (token) => {
-    let left
-    let right
     if (token.left != undefined) {
         token.left = simplify(token.left)
-        left = unparse(token.left)
     }
     if (token.right != undefined) {
         token.right = simplify(token.right)
-        right = unparse(token.right)
     }
     switch (token.type) {
     case "+":
@@ -690,14 +699,12 @@ let simplify = (token) => {
         return simplifyProduct(token)
     case "^":
         return simplifyPower(token)
+    case "(":
+        return simplifyFunction(token)
+    default:
+        // Return the token unchanged if we find no simplification.
+        return token
     }
-    // Try ad-hoc simplifications.
-    let simplification = simplifications[unparse(token)]
-    if (simplification != undefined) {
-        return parse(simplification)
-    }
-    // Return the token unchanged if we find no simplification.
-    return token
 }
 
 let derive = (expression) => {
