@@ -98,7 +98,7 @@ let tokenize = (expression) => {
 // algorithm see recursive descent on Wikipedia.
 let parse = (expression) => {
     // sum     ::= product {("+" | "-") product}
-    // product ::= sign {("*" | "/") product}
+    // product ::= sign {("*" | "/") sign}
     // sign    ::= ("+" | "-") sign | power
     // power   ::= factor ["^" sign]
     // factor  ::= number | name ["(" sum ")"] | "(" sum ")"

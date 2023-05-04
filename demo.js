@@ -1,6 +1,7 @@
 let deriveButton = document.querySelector("#derive-button")
 let deriveInput = document.querySelector("#derive-input")
 let deriveOutput = document.querySelector("#derive-output")
+let deriveAgainButton = document.querySelector("#derive-again-button")
 
 deriveButton.addEventListener(
     "click",
@@ -9,12 +10,14 @@ deriveButton.addEventListener(
             let expression = deriveInput.value
             let derivative = derive(expression)
             deriveOutput.textContent = `f'(x) = ${derivative}`
+            deriveAgainButton.style.display = "initial"
             canvas.style.display = "initial"
             wipeCanvas()
             plot(expression, "#0000FF")
             plot(derivative, "#FF0000")
         } catch (e) {
             deriveOutput.textContent = `ERROR: ${e}`
+            deriveAgainButton.style.display = "none"
             canvas.style.display = "none"
             console.log(e)
         }
@@ -27,6 +30,14 @@ deriveInput.addEventListener(
         if (e.code == "Enter" || e.code == "NumpadEnter") {
             deriveButton.click()
         }
+    }
+)
+
+deriveAgainButton.addEventListener(
+    "click",
+    () => {
+        deriveInput.value = deriveOutput.textContent.substring(8)
+        deriveButton.click()
     }
 )
 

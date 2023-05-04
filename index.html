@@ -6,6 +6,11 @@
         <script defer src="deriv.js"></script>
         <script defer src="demo.js"></script>
         <style>
+            #derive-again-button {
+                cursor: pointer;
+                display: none;
+            }
+
             a {
                 color:  #8000FF;
                 font-weight: bold;
@@ -51,6 +56,9 @@
         </p>
         <p>
             <span id="derive-output" style="color: #FF0000"></span>
+        </p>
+        <p>
+            <a id="derive-again-button">Derive again</a>
         </p>
         <p>
             <canvas height="300" id="main-canvas" width="300"></canvas>
