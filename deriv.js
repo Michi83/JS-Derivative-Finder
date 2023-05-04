@@ -424,6 +424,10 @@ let addToObject = (object, token, number) => {
     object[expression] += number
 }
 
+// A sum may be a complicated tree of +, -, and ~, so out strategy will be:
+// - Make an inventory of individual terms,
+// - Assemble the pieces.
+// We'll employ a similar strategy for products.
 let simplifySum = (token) => {
     let numberTerm = 0
     let terms = {}
@@ -493,27 +497,18 @@ let simplifySum = (token) => {
         }
     }
 
-    if (numberTerm > 0) {
-        if (expression != "") {
-            expression += ` + ${numberTerm}`
-        } else {
-            expression += `${numberTerm}`
-        }
+    if (expression == "") {
+        expression = `${numberTerm}`
+    } else if (numberTerm > 0) {
+        expression = `${expression} + ${numberTerm}`
     } else if (numberTerm < 0) {
-        if (expression != "") {
-            expression += ` - ${-numberTerm}`
-        } else {
-            expression += `${numberTerm}`
-        }
-    } else {
-        if (expression == "") {
-            expression = "0"
-        }
+        expression = `${expression} - ${-numberTerm}`
     }
 
     return parse(expression)
 }
 
+// Euclid's algorithm to find the GCD of two numbers.
 let euclid = (a, b) => {
     if (b == 0) {
         return a
@@ -523,8 +518,8 @@ let euclid = (a, b) => {
 }
 
 let simplifyProduct = (token) => {
-    let numberNumerator = 1
-    let numberDenominator = 1
+    let numberFactor1 = 1 // numerator
+    let numberFactor2 = 1 // denominator
     let factors = {}
 
     let collectFactors = (token, exponent = 1) => {
@@ -558,88 +553,74 @@ let simplifyProduct = (token) => {
             break
         case "number":
             if (exponent >= 0) {
-                numberNumerator *= Math.pow(token.value, exponent)
+                numberFactor1 *= Math.pow(token.value, exponent)
             } else {
-                numberDenominator *= Math.pow(token.value, -exponent)
+                numberFactor2 *= Math.pow(token.value, -exponent)
             }
             break
         }
     }
 
     collectFactors(token)
-    if (numberNumerator == 0 && numberDenominator == 0) {
+    if (numberFactor2 == 0) {
         return parse("0 / 0")
-    }
-    let gcd = euclid(numberNumerator, numberDenominator)
-    numberNumerator /= gcd
-    numberDenominator /= gcd
-    // From here on out numberDenominator will be non-negative.
-    if (numberDenominator < 0) {
-        numberNumerator = -numberNumerator
-        numberDenominator = -numberDenominator
-    }
-    let expressionNumerator
-    let expressionDenominator
-
-    if (numberNumerator == 0) {
+    } else if (numberFactor1 == 0) {
         return new Token("number", 0)
-    } else if (numberNumerator == 1) {
-        expressionNumerator = ""
-    } else if (numberNumerator == -1) {
-        expressionNumerator = "-"
-    } else {
-        expressionNumerator = `${numberNumerator}`
     }
-
-    if (numberDenominator == 0) {
-        return parse("0 / 0")
-    } else if (numberDenominator == 1) {
-        expressionDenominator = ""
-    } else if (numberDenominator == -1) {
-        expressionDenominator = "-"
-    } else {
-        expressionDenominator = `${numberDenominator}`
+    let gcd = euclid(numberFactor1, numberFactor2)
+    numberFactor1 /= gcd
+    numberFactor2 /= gcd
+    // From here on out numberFactor2 will be non-negative.
+    if (numberFactor2 < 0) {
+        numberFactor1 = -numberFactor1
+        numberFactor2 = -numberFactor2
     }
+    let expression1 = "" // numerator
+    let expression2 = "" // denominator
 
     for (let factor in factors) {
         let exponent = factors[factor]
         if (exponent > 0) {
-            if (expressionNumerator != "" && expressionNumerator != "-") {
-                expressionNumerator += " * "
+            if (expression1 != "") {
+                expression1 += " * "
             }
-            expressionNumerator += `${factor}`
+            expression1 += `${factor}`
             if (exponent != 1) {
-                expressionNumerator += `^${exponent}`
+                expression1 += `^${exponent}`
             }
         } else if (exponent < 0) {
-            if (expressionDenominator != "" && expressionDenominator != "-") {
-                expressionDenominator += " * "
+            if (expression2 != "") {
+                expression2 += " * "
             }
-            expressionDenominator += `${factor}`
+            expression2 += `${factor}`
             if (exponent != -1) {
-                expressionDenominator += `^${-exponent}`
+                expression2 += `^${-exponent}`
             }
         }
     }
 
-    if (expressionNumerator == "") {
-        expressionNumerator = "1"
-    } else if (expressionNumerator == "-") {
-        expressionNumerator = "-1"
-    }
-
-    if (expressionDenominator == "") {
-        expressionDenominator = "1"
-    }
-
-    if (expressionNumerator == "1" && expressionDenominator == "1") {
-        return new Token("number", 1)
-    } else if (expressionNumerator == "-1" && expressionDenominator == "1") {
-        return new Token("number", -1)
-    } else if (expressionDenominator == "1") {
-        return parse(expressionNumerator)
+    if (expression1 == "") {
+        expression1 = `${numberFactor1}`
+    } else if (numberFactor1 == 1) {
+        expression1 = `${expression1}`
+    } else if (numberFactor1 == -1) {
+        expression1 = `-${expression1}`
     } else {
-        return parse(`${expressionNumerator} / (${expressionDenominator})`)
+        expression1 = `${numberFactor1} * ${expression1}`
+    }
+
+    if (expression2 == "") {
+        expression2 = `${numberFactor2}`
+    } else if (numberFactor2 == 1) {
+        expression2 = `${expression2}`
+    } else {
+        expression2 = `${numberFactor2} * ${expression2}`
+    }
+
+    if (expression2 == "1") {
+        return parse(expression1)
+    } else {
+        return parse(`${expression1} / (${expression2})`)
     }
 }
 
@@ -691,6 +672,7 @@ let simplifyFunction = (token) => {
 // Don't expect this function to always find the simplest form. Only a few
 // common sense simplifications are applied.
 let simplify = (token) => {
+    // Simplify subtrees first.
     if (token.left != undefined) {
         token.left = simplify(token.left)
     }
