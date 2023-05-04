@@ -635,6 +635,29 @@ let simplifyProduct = (token) => {
     }
 }
 
+let simplifyPower = (token) => {
+    if (token.left.type == "number" && token.right.type == "number") {
+        if (token.right.value >= 0) {
+            let value = Math.pow(token.left.value, token.right.value)
+            return new Token("number", value)
+        } else {
+            let value = Math.pow(token.left.value, -token.right.value)
+            return parse(`1 / ${value}`)
+        }
+    } else if (token.left.type == "number") {
+        if (token.left.value == 0 || token.left.value == 1) {
+            return token.left
+        }
+    } else if (token.right.type == "number") {
+        if (token.right.value == 0) {
+            return new Token("number", 1)
+        } else if (token.right.value == 1) {
+            return token.left
+        }
+    }
+    return token
+}
+
 let simplifications = {
     "exp(0)": "1",
     "exp(1)": "e",
@@ -666,28 +689,7 @@ let simplify = (token) => {
     case "/":
         return simplifyProduct(token)
     case "^":
-        if (token.left.type == "number" && token.right.type == "number"
-                && token.right.value >= 0) {
-            let value = Math.pow(token.left.value, token.right.value)
-            return new Token("number", value)
-        }
-        if (left == "0") {
-            return token.left
-        } else if (left == "1") {
-            return token.left
-        } else if (right == "0") {
-            return parse("1")
-        } else if (right == "1") {
-            return token.left
-        }
-        break
-        if (token.right.type == "number") {
-            let value = -token.right.value
-            return new Token("number", value)
-        } else if (token.right.type == "~") {
-            return token.right.right
-        }
-        break
+        return simplifyPower(token)
     }
     // Try ad-hoc simplifications.
     let simplification = simplifications[unparse(token)]
