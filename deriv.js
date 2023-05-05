@@ -477,7 +477,13 @@ let simplifyPower = (token) => {
             return new Token("number", value)
         } else {
             let value = Math.pow(token.left.value, -token.right.value)
-            return parse(`1 / ${value}`)
+            if (value > 0) {
+                return parse(`1 / ${value}`)
+            } else if (value < 0) {
+                return parse(`-1 / ${-value}`)
+            } else {
+                return parse("0 / 0")
+            }
         }
     } else if (token.left.type == "number") {
         if (token.left.value == 0 || token.left.value == 1) {
