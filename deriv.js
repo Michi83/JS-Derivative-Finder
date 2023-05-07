@@ -261,294 +261,6 @@ let unparse = (token) => {
 // for us:
 // let root = parse("1 + 2")
 
-// Simplification mechanism
-
-let addToObject = (object, token, number) => {
-    let expression = `(${unparse(token)})`
-    if (object[expression] == undefined) {
-        object[expression] = 0
-    }
-    object[expression] += number
-}
-
-// A sum may be a complicated tree of +, -, and ~, so our strategy will be:
-// - Make an inventory of the individual terms,
-// - Assemble the pieces.
-// We'll employ a similar strategy for products.
-let simplifySum = (token) => {
-    let numberTerm = 0
-    let terms = {}
-
-    let collectTerms = (token, factor = 1) => {
-        switch (token.type) {
-        case "+":
-            collectTerms(token.left, factor)
-            collectTerms(token.right, factor)
-            break
-        case "-":
-            collectTerms(token.left, factor)
-            collectTerms(token.right, -factor)
-            break
-        case "*":
-            if (token.left.type == "number") {
-                collectTerms(token.right, factor * token.left.value)
-            } else {
-                addToObject(terms, token, factor)
-            }
-            break
-        case "/":
-            addToObject(terms, token, factor)
-            break
-        case "~":
-            collectTerms(token.right, -factor)
-            break
-        case "^":
-            addToObject(terms, token, factor)
-            break
-        case "(":
-            addToObject(terms, token, factor)
-            break
-        case "name":
-            addToObject(terms, token, factor)
-            break
-        case "number":
-            numberTerm += factor * token.value
-            break
-        }
-    }
-
-    collectTerms(token)
-    let expression = ""
-
-    for (let term in terms) {
-        let factor = terms[term]
-        if (factor > 0) {
-            if (expression != "") {
-                expression += " + "
-            }
-            if (factor != 1) {
-                expression += `${factor} * `
-            }
-            expression += term
-        } else if (factor < 0) {
-            if (expression != "") {
-                expression += " - "
-            } else {
-                expression += "-"
-            }
-            if (factor != -1) {
-                expression += `${-factor} * `
-            }
-            expression += term
-        }
-    }
-
-    if (expression == "") {
-        return new Token("number", numberTerm)
-    } else if (numberTerm > 0) {
-        expression = `${expression} + ${numberTerm}`
-    } else if (numberTerm < 0) {
-        expression = `${expression} - ${-numberTerm}`
-    }
-
-    return parse(expression)
-}
-
-// Euclid's algorithm to find the GCD of two numbers.
-let euclid = (a, b) => {
-    if (b == 0) {
-        return a
-    } else {
-        return euclid(b, a % b)
-    }
-}
-
-let simplifyProduct = (token) => {
-    let numberFactor1 = 1 // numerator
-    let numberFactor2 = 1 // denominator
-    let factors = {}
-
-    let collectFactors = (token, exponent = 1) => {
-        switch (token.type) {
-        case "+":
-        case "-":
-            addToObject(factors, token, exponent)
-            break
-        case "*":
-            collectFactors(token.left, exponent)
-            collectFactors(token.right, exponent)
-            break
-        case "/":
-            collectFactors(token.left, exponent)
-            collectFactors(token.right, -exponent)
-            break
-        case "~":
-            collectFactors(new Token("number", -1), exponent)
-            collectFactors(token.right, exponent)
-            break
-        case "^":
-            if (token.right.type == "number") {
-                collectFactors(token.left, exponent * token.right.value)
-            } else {
-                addToObject(factors, token, exponent)
-            }
-            break
-        case "(":
-        case "name":
-            addToObject(factors, token, exponent)
-            break
-        case "number":
-            if (exponent >= 0) {
-                numberFactor1 *= Math.pow(token.value, exponent)
-            } else {
-                numberFactor2 *= Math.pow(token.value, -exponent)
-            }
-            break
-        }
-    }
-
-    collectFactors(token)
-    if (numberFactor2 == 0) {
-        return parse("0 / 0")
-    } else if (numberFactor1 == 0) {
-        return new Token("number", 0)
-    }
-    let gcd = euclid(numberFactor1, numberFactor2)
-    numberFactor1 /= gcd
-    numberFactor2 /= gcd
-    // From here on out numberFactor2 will be non-negative.
-    if (numberFactor2 < 0) {
-        numberFactor1 = -numberFactor1
-        numberFactor2 = -numberFactor2
-    }
-    let expression1 = "" // numerator
-    let expression2 = "" // denominator
-
-    for (let factor in factors) {
-        let exponent = factors[factor]
-        if (exponent > 0) {
-            if (expression1 != "") {
-                expression1 += " * "
-            }
-            expression1 += `${factor}`
-            if (exponent != 1) {
-                expression1 += `^${exponent}`
-            }
-        } else if (exponent < 0) {
-            if (expression2 != "") {
-                expression2 += " * "
-            }
-            expression2 += `${factor}`
-            if (exponent != -1) {
-                expression2 += `^${-exponent}`
-            }
-        }
-    }
-
-    if (expression1 == "") {
-        expression1 = `${numberFactor1}`
-    } else if (numberFactor1 == 1) {
-        expression1 = `${expression1}`
-    } else if (numberFactor1 == -1) {
-        expression1 = `-${expression1}`
-    } else {
-        expression1 = `${numberFactor1} * ${expression1}`
-    }
-
-    if (expression2 == "") {
-        expression2 = `${numberFactor2}`
-    } else if (numberFactor2 == 1) {
-        expression2 = `${expression2}`
-    } else {
-        expression2 = `${numberFactor2} * ${expression2}`
-    }
-
-    if (expression2 == "1") {
-        return parse(expression1)
-    } else {
-        return parse(`${expression1} / (${expression2})`)
-    }
-}
-
-let simplifyPower = (token) => {
-    if (token.left.type == "number" && token.right.type == "number") {
-        if (token.right.value >= 0) {
-            let value = Math.pow(token.left.value, token.right.value)
-            return new Token("number", value)
-        } else {
-            let value = Math.pow(token.left.value, -token.right.value)
-            if (value > 0) {
-                return parse(`1 / ${value}`)
-            } else if (value < 0) {
-                return parse(`-1 / ${-value}`)
-            } else {
-                return parse("0 / 0")
-            }
-        }
-    } else if (token.left.type == "number") {
-        if (token.left.value == 0 || token.left.value == 1) {
-            return token.left
-        }
-    } else if (token.right.type == "number") {
-        if (token.right.value == 0) {
-            return new Token("number", 1)
-        } else if (token.right.value == 1) {
-            return token.left
-        }
-    }
-    return token
-}
-
-let functionSimplifications = {
-    "exp(0)": "1",
-    "exp(1)": "e",
-    "ln(1)": "0",
-    "ln(e)": "1",
-    "log10(1)": "0",
-    "log10(10)": "1",
-    "log2(1)": "0",
-    "log2(2)": "1",
-    "sqrt(0)": "0",
-    "sqrt(1)": "1"
-}
-
-let simplifyFunction = (token) => {
-    let simplification = functionSimplifications[unparse(token)]
-    if (simplification != undefined) {
-        return parse(simplification)
-    } else {
-        return token
-    }
-}
-
-// Don't expect this function to always find the simplest form. Only a few
-// common sense simplifications are applied.
-let simplify = (token) => {
-    // Simplify subtrees first.
-    if (token.left != undefined) {
-        token.left = simplify(token.left)
-    }
-    if (token.right != undefined) {
-        token.right = simplify(token.right)
-    }
-    switch (token.type) {
-    case "+":
-    case "-":
-    case "~":
-        return simplifySum(token)
-    case "*":
-    case "/":
-        return simplifyProduct(token)
-    case "^":
-        return simplifyPower(token)
-    case "(":
-        return simplifyFunction(token)
-    default:
-        // Return the token unchanged if we find no simplification.
-        return token
-    }
-}
-
 let deriveToken = (token) => {
     let deriv
     let left
@@ -706,6 +418,301 @@ let derive = (expression) => {
     root = deriveToken(root)
     root = simplify(root)
     return unparse(root)
+}
+
+// Simplification mechanism
+
+let addToObject = (object, token, number) => {
+    let expression = `(${unparse(token)})`
+    if (object[expression] == undefined) {
+        object[expression] = 0
+    }
+    object[expression] += number
+}
+
+// A sum may be a complicated tree of +, -, and ~, so our strategy will be:
+// - Make an inventory of the individual terms,
+// - Assemble the pieces.
+// We'll employ a similar strategy for products.
+let simplifySum = (token) => {
+    let numberTerm = 0
+    let terms = {}
+
+    let collectTerms = (token, factor = 1) => {
+        switch (token.type) {
+        case "+":
+            collectTerms(token.left, factor)
+            collectTerms(token.right, factor)
+            break
+        case "-":
+            collectTerms(token.left, factor)
+            collectTerms(token.right, -factor)
+            break
+        case "*":
+        case "/":
+            // Separate numeric factor from other factors.
+            let [num, den, factors] = takeProductInventory(token)
+            factor *= num
+            token = assembleProductFromInventory(1, den, factors)
+            addToObject(terms, token, factor)
+            break
+        case "~":
+            collectTerms(token.right, -factor)
+            break
+        case "^":
+            addToObject(terms, token, factor)
+            break
+        case "(":
+            addToObject(terms, token, factor)
+            break
+        case "name":
+            addToObject(terms, token, factor)
+            break
+        case "number":
+            numberTerm += factor * token.value
+            break
+        }
+    }
+
+    collectTerms(token)
+    let expression = ""
+
+    for (let term in terms) {
+        let factor = terms[term]
+        if (factor > 0) {
+            if (expression != "") {
+                expression += " + "
+            }
+            if (factor != 1) {
+                expression += `${factor} * `
+            }
+            expression += term
+        } else if (factor < 0) {
+            if (expression != "") {
+                expression += " - "
+            } else {
+                expression += "-"
+            }
+            if (factor != -1) {
+                expression += `${-factor} * `
+            }
+            expression += term
+        }
+    }
+
+    if (expression == "") {
+        return new Token("number", numberTerm)
+    } else if (numberTerm > 0) {
+        expression = `${expression} + ${numberTerm}`
+    } else if (numberTerm < 0) {
+        expression = `${expression} - ${-numberTerm}`
+    }
+
+    return parse(expression)
+}
+
+// Euclid's algorithm to find the GCD of two numbers.
+let euclid = (a, b) => {
+    if (b == 0) {
+        return a
+    } else {
+        return euclid(b, a % b)
+    }
+}
+
+let takeProductInventory = (token) => {
+    let num = 1 // numeric factor of the numerator
+    let den = 1 // numeric factor of the denominator
+    let factors = {}
+
+    let recurse = (token, exponent = 1) => {
+        switch (token.type) {
+        case "+":
+        case "-":
+            addToObject(factors, token, exponent)
+            break
+        case "*":
+            recurse(token.left, exponent)
+            recurse(token.right, exponent)
+            break
+        case "/":
+            recurse(token.left, exponent)
+            recurse(token.right, -exponent)
+            break
+        case "~":
+            recurse(new Token("number", -1), exponent)
+            recurse(token.right, exponent)
+            break
+        case "^":
+            if (token.right.type == "number") {
+                recurse(token.left, exponent * token.right.value)
+            } else {
+                addToObject(factors, token, exponent)
+            }
+            break
+        case "(":
+        case "name":
+            addToObject(factors, token, exponent)
+            break
+        case "number":
+            if (exponent >= 0) {
+                num *= Math.pow(token.value, exponent)
+            } else {
+                den *= Math.pow(token.value, -exponent)
+            }
+            break
+        }
+    }
+
+    recurse(token)
+    let gcd = euclid(num, den)
+    num /= gcd
+    den /= gcd
+    // From here on out den will be non-negative.
+    if (den < 0) {
+        num = -num
+        den = -den
+    }
+    return [num, den, factors]
+}
+
+let assembleProductFromInventory = (num, den, factors) => {
+    if (den == 0 || isNaN(den)) {
+        return parse("0 / 0")
+    } else if (num == 0) {
+        return new Token("number", 0)
+    }
+    let expression1 = "" // numerator
+    let expression2 = "" // denominator
+
+    for (let factor in factors) {
+        let exponent = factors[factor]
+        if (exponent > 0) {
+            if (expression1 != "") {
+                expression1 += " * "
+            }
+            expression1 += `${factor}`
+            if (exponent != 1) {
+                expression1 += `^${exponent}`
+            }
+        } else if (exponent < 0) {
+            if (expression2 != "") {
+                expression2 += " * "
+            }
+            expression2 += `${factor}`
+            if (exponent != -1) {
+                expression2 += `^${-exponent}`
+            }
+        }
+    }
+
+    if (expression1 == "") {
+        expression1 = `${num}`
+    } else if (num == 1) {
+        expression1 = `${expression1}`
+    } else if (num == -1) {
+        expression1 = `-${expression1}`
+    } else {
+        expression1 = `${num} * ${expression1}`
+    }
+
+    if (expression2 == "") {
+        expression2 = `${den}`
+    } else if (den == 1) {
+        expression2 = `${expression2}`
+    } else {
+        expression2 = `${den} * ${expression2}`
+    }
+
+    if (expression2 == "1") {
+        return parse(expression1)
+    } else {
+        return parse(`${expression1} / (${expression2})`)
+    }
+}
+
+let simplifyProduct = (token) => {
+    let [num, den, factors] = takeProductInventory(token)
+    return assembleProductFromInventory(num, den, factors)
+}
+
+let simplifyPower = (token) => {
+    if (token.left.type == "number" && token.right.type == "number") {
+        if (token.right.value >= 0) {
+            let value = Math.pow(token.left.value, token.right.value)
+            return new Token("number", value)
+        } else {
+            let value = Math.pow(token.left.value, -token.right.value)
+            if (value > 0) {
+                return parse(`1 / ${value}`)
+            } else if (value < 0) {
+                return parse(`-1 / ${-value}`)
+            } else {
+                return parse("0 / 0")
+            }
+        }
+    } else if (token.left.type == "number") {
+        if (token.left.value == 0 || token.left.value == 1) {
+            return token.left
+        }
+    } else if (token.right.type == "number") {
+        if (token.right.value == 0) {
+            return new Token("number", 1)
+        } else if (token.right.value == 1) {
+            return token.left
+        }
+    }
+    return token
+}
+
+let functionSimplifications = {
+    "exp(0)": "1",
+    "exp(1)": "e",
+    "ln(1)": "0",
+    "ln(e)": "1",
+    "log10(1)": "0",
+    "log10(10)": "1",
+    "log2(1)": "0",
+    "log2(2)": "1",
+    "sqrt(0)": "0",
+    "sqrt(1)": "1"
+}
+
+let simplifyFunction = (token) => {
+    let simplification = functionSimplifications[unparse(token)]
+    if (simplification != undefined) {
+        return parse(simplification)
+    } else {
+        return token
+    }
+}
+
+// Don't expect this function to always find the simplest form. Only a few
+// common sense simplifications are applied.
+let simplify = (token) => {
+    // Simplify subtrees first.
+    if (token.left != undefined) {
+        token.left = simplify(token.left)
+    }
+    if (token.right != undefined) {
+        token.right = simplify(token.right)
+    }
+    switch (token.type) {
+    case "+":
+    case "-":
+    case "~":
+        return simplifySum(token)
+    case "*":
+    case "/":
+        return simplifyProduct(token)
+    case "^":
+        return simplifyPower(token)
+    case "(":
+        return simplifyFunction(token)
+    default:
+        // Return the token unchanged if we find no simplification.
+        return token
+    }
 }
 
 // With all this work done, writing code to evaluate an expression for a given x
