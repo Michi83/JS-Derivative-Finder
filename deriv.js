@@ -67,6 +67,20 @@ let tokenize = (expression) => {
                     throw "unexpected end of number"
                 }
             }
+            if (expression[to] == "E" || expression[to] == "e") {
+                to++
+                if (expression[to] == "+" || expression[to] == "-") {
+                    to++
+                }
+                if (isDigit(expression[to])) {
+                    to++
+                    while (isDigit(expression[to])) {
+                        to++
+                    }
+                } else {
+                    throw "unexpected end of number"
+                }
+            }
             let value = Number(expression.substring(from, to))
             let token = new Token("number", value)
             tokens.push(token)
