@@ -448,6 +448,11 @@ let addToObject = (object, token, number) => {
 // - Make an inventory of the individual terms,
 // - Assemble the pieces.
 // We'll employ a similar strategy for products.
+// In order to catch some commutative equalities, symbolic terms/factors will be
+// in "ASCII-betical" order. The operands should come out in the following
+// order:
+// symbol + symbol + ... + number
+// number * symbol * symbol * ... / (number * symbol * symbol * ...)
 let simplifySum = (token) => {
     let numberTerm = 0
     let terms = {}
@@ -466,9 +471,8 @@ let simplifySum = (token) => {
         case "/":
             // Separate numeric factor from other factors.
             let [num, den, factors] = takeProductInventory(token)
-            factor *= num
             token = assembleProductFromInventory(1, den, factors)
-            addToObject(terms, token, factor)
+            addToObject(terms, token, num * factor)
             break
         case "~":
             collectTerms(token.right, -factor)
@@ -491,7 +495,7 @@ let simplifySum = (token) => {
     collectTerms(token)
     let expression = ""
 
-    for (let term in terms) {
+    for (let term of Object.keys(terms).sort()) {
         let factor = terms[term]
         if (factor > 0) {
             if (expression != "") {
@@ -599,7 +603,7 @@ let assembleProductFromInventory = (num, den, factors) => {
     let expression1 = "" // numerator
     let expression2 = "" // denominator
 
-    for (let factor in factors) {
+    for (let factor of Object.keys(factors).sort()) {
         let exponent = factors[factor]
         if (exponent > 0) {
             if (expression1 != "") {
